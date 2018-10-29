@@ -31,8 +31,12 @@ public:
 
 	~Dictionary();
 
-	// insert a string in dictionary, return -1 if dictionary is full
+	// insert a string in dictionary, return false if dictionary is full
+	// if key is already in the dictionary, just reset value
 	bool insert(const String &, const int n = 0);
+
+	// set a key's value, if this key isn't in the dictionary, return false
+	bool setValue(const String&, const int n = 0);
 
 	// judge if a string has already been in dictionary
 	bool inDict(const String &);
@@ -48,6 +52,8 @@ public:
 
 	// get all nonzero value key and value
 	Data getAll();
+
+	// set value or
 };
 
 

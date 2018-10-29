@@ -12,6 +12,12 @@ private:
 	int size;
 	int capacity;
 	const int defaultCapacity = 10;
+
+	// build next array for kmp
+	int * buildNext(const String & s);
+
+	// enlarge capacity if needed
+	void enlarge();
 public:
 	// default constructor
 	String();
@@ -31,8 +37,6 @@ public:
 	~String();
 
 	int length() const;
-
-	void enlarge();
 
 	// assign a char array to string
 	void assign(const char * s);
@@ -55,7 +59,6 @@ public:
 
 	// concat a string and return itself
 	String & concat(const String & s);
-
 
 	// concat a char array and return itself
 	String & concat(const char *s);
@@ -80,7 +83,23 @@ public:
 	// match for the given range
 	bool match(const String & s, int start = 0, int over = 0);
 
-	int * buildNext(const String & s);
+	// judge if this is a English word or english word with number, but pure number will return false
+	bool isWord()
+	{
+		// use flag to save if there is at least one English character
+		bool flag = false;
+		for (int i = 0; i < size; i++)
+			if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z'))
+			{
+				flag = true;
+				continue;
+			}
+			else if ((str[i] >= '0' && str[i] <= '9') || str[i] == '\'')
+				continue;
+			else
+				return false;
+		return flag;
+	}
 
 	// use kmp to get the position of a sub string, it will after the given position
 	int indexOf(const String & s, int position = 0);
@@ -111,12 +130,15 @@ class String;
 // overload ostream << string, use inline to avoid mutiple definition
 inline std::ostream & operator << (std::ostream & stream, const  String & s)
 {
+	char c = s[s.size];
 	s[s.size] = 0;
+
 	int i;
 	for (i = 0; i < s.size; i++)
 		if (s[i] != '\n')
 			break;
 	stream << s.str + i;
+	s[s.size] = c;
 	return stream;
 }
 

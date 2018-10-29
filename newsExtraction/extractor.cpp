@@ -36,9 +36,6 @@ void Extractor::initialize()
 	timeStamp.clear();
 	source.clear();
 	dict.clear();
-#if USE_STOP_WORD
-	useStopWord();
-#endif
 }
 
 void Extractor::setName(String & s)
@@ -622,6 +619,14 @@ void Extractor::segmentation()
 				pos += length - 1;
 				break;
 			}
+			if (keyTry.isWord())
+			{
+				// if this is a English word, add it in dic
+				txt << keyTry << std::endl;
+				dict.insert(keyTry,1);
+				pos += length - 1;
+				break;
+			}
 		}
 	}
 	txt.close();
@@ -630,6 +635,9 @@ void Extractor::segmentation()
 
 void Extractor::outputTxt()
 {
+#if USE_STOP_WORD
+	useStopWord();
+#endif
 	// get dict's segmentation result
 	Data result = dict.getAll();
 	int len = result.length();

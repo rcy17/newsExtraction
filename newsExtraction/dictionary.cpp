@@ -4,8 +4,8 @@
 
 Dictionary::Dictionary() :capacity(mod), size(0)
 {
-	value = new int[capacity+5];
-	key = new String[capacity+5];
+	value = new int[capacity + 5];
+	key = new String[capacity + 5];
 }
 
 Dictionary::~Dictionary()
@@ -28,6 +28,15 @@ bool Dictionary::insert(const String & s, const int n)
 	key[k] = s;
 	value[k] = n;
 	size++;
+	return true;
+}
+
+bool Dictionary::setValue(const String & s, const int n)
+{
+	int rank = getRank(s);
+	if (rank == DICTIONARY_WRONG_RETURN)
+		return false;
+	value[rank] = n;
 	return true;
 }
 
