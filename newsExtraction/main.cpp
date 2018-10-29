@@ -1,12 +1,6 @@
-#pragma warning(disable:4996)
 #include <iostream>
-#include <fstream>
-#include "list.h"
-#include "stack.h"
 #include "string.h"
 #include "extractor.h"
-#include "dictionary.h"
-#include <string>
 using namespace std;
 
 int main()

@@ -564,7 +564,7 @@ void Extractor::outputInfo()
 
 void Extractor::loadDict()
 {
-	ifstream dictFile("out.dic");
+	ifstream dictFile("./dic/out.dic");
 	String s;
 	char c = 0;
 	do
@@ -581,7 +581,7 @@ void Extractor::loadDict()
 	// load stop word table
 	dictFile.clear();
 	dictFile.close();
-	dictFile.open("stop.dic");
+	dictFile.open("./dic/stop.dic");
 	c = 0;
 	do
 	{
