@@ -25,6 +25,7 @@
     <ClCompile Include="string.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="configuration.h" />
     <ClInclude Include="dictionary.h" />
     <ClInclude Include="extractor.h" />
     <ClInclude Include="filescanner.h" />

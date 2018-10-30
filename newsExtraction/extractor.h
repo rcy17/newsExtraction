@@ -39,14 +39,21 @@ private:
 	};
 	ifstream html;
 	ofstream info,txt;
+	
 	// for file name
 	String inputPath,outputPath,mainName,allData;
+	
 	// for news
 	String content, tittle, source, timeStamp;
+	
 	// for news content extractor
 	int contentTagPos,sourceTagPos;
+	
 	// for news extractor to save state
 	SearchState state, statePast;
+	
+	// some settings
+	bool applyStopWord, invalidTagReport;
 
 	// save all stop word, maybe won't use in future
 	List<String> stopWord;
@@ -100,4 +107,7 @@ public:
 
 	// segmentation for words in dictionary to content
 	void divideWords();
+
+	// set useStopWord and invalidTagReport
+	void set(bool, bool);
 };

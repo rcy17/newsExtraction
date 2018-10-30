@@ -5,10 +5,6 @@ using std::cout;
 
 #define STOP_WORD_FLAG -1
 
-#define USE_STOP_WORD true
-
-//#define INVALID_TAG_REPORT
-
 Extractor::Extractor()
 {
 	inputPath.assign("./input/");
@@ -459,33 +455,36 @@ void Extractor::extractInfo()
 			break;
 		}
 	}
-#ifdef INVALID_TAG_REPORT
-	// in this case, report all mismatch tags
-	if (tagSave.length())
+	if (invalidTagReport)
 	{
-		cout << "here are all the tags without end tags:";
+		// in this case, report all mismatch tags
+		if (tagSave.length())
+		{
+			cout << "here are all the tags without end tags:";
+			while (!tagSave.empty())
+			{
+				cout << tagSave.pop() << " ";
+			}
+			cout << "\n";
+		}
+		if (misTag.length())
+		{
+			cout << "here are all the tags without start tags:";
+			while (!misTag.empty())
+			{
+				cout << misTag.pop() << " ";
+			}
+			cout << "\n";
+		}
+	}
+	else
+	{
+		// else, just release these stacks
 		while (!tagSave.empty())
-		{
-			cout << tagSave.pop() << " ";
-		}
-		cout << "\n";
-	}
-	if (misTag.length())
-	{
-		cout << "here are all the tags without start tags:";
+			tagSave.pop();
 		while (!misTag.empty())
-		{
-			cout << misTag.pop() << " ";
-		}
-		cout << "\n";
+			misTag.pop();
 	}
-#else
-	// else, just release these stacks
-	while (!tagSave.empty())
-		tagSave.pop();
-	while (!misTag.empty())
-		misTag.pop();
-#endif
 }
 
 // judge if a char is a number
@@ -652,9 +651,8 @@ void Extractor::divideWords()
 
 void Extractor::outputTxt()
 {
-#if USE_STOP_WORD
-	useStopWord();
-#endif
+	if (applyStopWord)
+		useStopWord();
 	// get dict's segmentation result
 	Data result = dict.getAll();
 	int len = result.length();
@@ -696,4 +694,10 @@ void Extractor::processOperation(String & fileName)
 	getData();
 	extractInfo();
 	output();
+}
+
+void Extractor::set(bool applyStopWordSet, bool invalidTagReportSet)
+{
+	applyStopWord = applyStopWordSet;
+	invalidTagReport = invalidTagReportSet;
 }
