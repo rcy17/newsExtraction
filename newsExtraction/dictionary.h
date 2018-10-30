@@ -147,13 +147,13 @@ public:
 	// use merge sort to sort it
 	void mergesort(int lo, int hi)
 	{
-		if (lo + 2 == hi)
+		if (hi - lo == 2)
 		{
 			if (allValue[lo] < allValue[lo + 1])
 				swap(lo, lo + 1);
 			return;
 		}
-		if (lo + 1 == hi)
+		if (hi - lo <  2)
 			return;
 		int mid = (lo + hi) >> 1;
 		mergesort(lo, mid);

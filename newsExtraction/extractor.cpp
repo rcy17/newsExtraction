@@ -7,12 +7,14 @@ using std::cout;
 
 #define USE_STOP_WORD true
 
+//#define INVALID_TAG_REPORT
+
 Extractor::Extractor()
 {
 	inputPath.assign("./input/");
 	outputPath.assign("./output/");
 	cout << R"(loading "in.dic", please waiting......)";
-	loadDict();
+	initDictionary();
 	cout << "\nloading finished!" << std::endl;
 	initialize();
 }
@@ -122,7 +124,7 @@ void Extractor::checkTag(Stack<String> & s, Stack<String> & mis, String & tag)
 	}
 }
 
-void Extractor::unwrap()
+void Extractor::extractInfo()
 {
 	// use a stack to save tags as requested
 	Stack<String> tagSave;
@@ -355,6 +357,7 @@ void Extractor::unwrap()
 			}
 			break;
 		case UNIMPORTANT:
+			// for those unimportant tag like img, link, input, just ignore
 			if (allData[pos] == '>')
 			{
 				state = FREE;
@@ -455,8 +458,9 @@ void Extractor::unwrap()
 		default:
 			break;
 		}
-
 	}
+#ifdef INVALID_TAG_REPORT
+	// in this case, report all mismatch tags
 	if (tagSave.length())
 	{
 		cout << "here are all the tags without end tags:";
@@ -475,6 +479,13 @@ void Extractor::unwrap()
 		}
 		cout << "\n";
 	}
+#else
+	// else, just release these stacks
+	while (!tagSave.empty())
+		tagSave.pop();
+	while (!misTag.empty())
+		misTag.pop();
+#endif
 }
 
 // judge if a char is a number
@@ -491,6 +502,7 @@ inline String & getTime(String & s)
 	{
 		for (int i = 0; i < s.length() - 9; i++)
 		{
+			// get date as 2018-10-30
 			if (isdigit(s[i]) && isdigit(s[i + 1]) && isdigit(s[i + 2]) && isdigit(s[i + 3])
 				&& s[i + 4] == '-' && isdigit(s[i + 5]) && isdigit(s[i + 6]) && s[i + 7] == '-'
 				&& isdigit(s[i + 8]) && isdigit(s[i + 9]))
@@ -502,6 +514,7 @@ inline String & getTime(String & s)
 		}
 		for (int i = 0; i < s.length() - 7; i++)
 		{
+			// get time as 18:05
 			if (isdigit(s[i]) && isdigit(s[i + 1]) && s[i + 2] == ':'
 				&& isdigit(s[i + 3]) && isdigit(s[i + 4]) && s[i + 5] == ':'
 				&& isdigit(s[i + 6]) && isdigit(s[i + 7]))
@@ -518,10 +531,12 @@ inline String & reorganiseSource(String & s)
 {
 	for (int i = 0; i < s.length() - 1; i++)
 	{
+		// use ' ' replace ' ' 
 		if (s[i] == '\n')
 			s[i] = ' ';
 		if (s[i] == ' ')
 		{
+			// remove continuous ' '
 			while (i + 1 < s.length() && (s[i + 1] == ' ' || s[i + 1] == '\n'))
 				s.remove(i + 1);
 			i++;
@@ -551,15 +566,17 @@ void Extractor::outputInfo()
 {
 	// put out tittle, source, time and content
 	info.open((outputPath + mainName + String(".info")).getString());
+
 	info << tittle << std::endl;
 	info << reorganiseSource(source) << std::endl;
 	info << getTime(timeStamp) << std::endl;
 	info << reorganiseContent(content) << std::endl;
+
 	info.close();
 	info.clear();
 }
 
-void Extractor::loadDict()
+void Extractor::initDictionary()
 {
 	ifstream dictFile("./dic/out.dic");
 	String s;
@@ -595,7 +612,7 @@ void Extractor::loadDict()
 	} while (c != EOF);
 }
 
-void Extractor::segmentation()
+void Extractor::divideWords()
 {
 	int contentLength = content.length();
 	String keyTry;
@@ -623,7 +640,7 @@ void Extractor::segmentation()
 			{
 				// if this is a English word, add it in dic
 				txt << keyTry << std::endl;
-				dict.insert(keyTry,1);
+				dict.insert(keyTry, 1);
 				pos += length - 1;
 				break;
 			}
@@ -644,7 +661,7 @@ void Extractor::outputTxt()
 	// sort according to times
 	result.mergesort(0, len);
 	txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
-	txt << "\n以下为超过一次的非停用词词频统计：" << std::endl;
+	txt << "\n以下为超过一次的非中文停用词词频统计：" << std::endl;
 	// output words
 	for (int i = 0; i < len; i++)
 	{
@@ -659,7 +676,7 @@ void Extractor::outputTxt()
 void Extractor::output()
 {
 	outputInfo();
-	segmentation();
+	divideWords();
 	outputTxt();
 }
 
@@ -671,4 +688,12 @@ void Extractor::useStopWord()
 		dict[node->data] = STOP_WORD_FLAG;
 		node = node->next;
 	}
+}
+
+void Extractor::processOperation(String & fileName)
+{
+	setName(fileName);
+	getData();
+	extractInfo();
+	output();
 }

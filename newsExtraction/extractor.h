@@ -63,12 +63,6 @@ private:
 	// use a dictionary to divide words
 	Dictionary dict;
 
-	// load dictionary for segmentation
-	void loadDict();
-
-	// segmentation for words in dictionary to content
-	void segmentation();
-
 	// output segmentation's result
 	void outputTxt();
 
@@ -93,8 +87,17 @@ public:
 	void getData();
 	
 	// unwrap the html data
-	void unwrap();
+	void extractInfo();
 
 	// output all thing needed
 	void output();
+
+	// do the things this assignment need doing
+	void processOperation(String &);
+
+	// load dictionary for segmentation
+	void initDictionary();
+
+	// segmentation for words in dictionary to content
+	void divideWords();
 };

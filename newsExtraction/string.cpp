@@ -54,7 +54,7 @@ int String::length() const
 
 void String::enlarge()
 {
-	char * s = new char[capacity *= 2];
+	char * s = new char[capacity *= 2 + 1];
 	for (int i = 0; i < size; i++)
 		s[i] = str[i];
 	delete[]str;
