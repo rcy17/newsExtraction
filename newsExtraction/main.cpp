@@ -20,10 +20,10 @@ int main()
 	{
 		// in auto scanning, this program will scan all html files in ./input/
 		HTMLScanner scanner;
-		for (int i = 0; i < scanner.length(); i++)
+		while(fileName = scanner.file_name.del(0))
 		{
-			cout << "now start to extract from " << scanner[i] << ", please wating..." << endl;
-			extractor.processOperation(scanner[i]);
+			cout << "now start to extract from " << fileName << ", please wating..." << endl;
+			extractor.processOperation(fileName);
 		}
 		// now give some message before exiting
 		cout << "all done!" << endl;

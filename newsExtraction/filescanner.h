@@ -3,37 +3,24 @@
 #include <windows.h>
 #undef NOMINMAX
 #include "string.h"
+#include "list.h"
 
 class HTMLScanner
 {
 private:
-	int size;
-	String * fileName;
-	int capacity;
-	const static int DEFAULT_CAPACITY = 30;
 	String filePath;
-
-	// enlarge capacity by twice
-	void enlarge()
-	{
-		String * new_string = new String[capacity *= 2];
-		for (int i = 0; i < size; i++)
-			new_string[i] = fileName[i];
-		delete[] fileName;
-		fileName = new_string;
-	}
 public:
+	List<String> file_name;
+
 	// initialize drectory
-	HTMLScanner(const String & path = "./input/", int capacity = DEFAULT_CAPACITY) :filePath(path), capacity(capacity)
+	HTMLScanner(const String & path = "./input/") :filePath(path)
 	{
-		fileName = new String[capacity];
-		size = 0;
 		getFile();
 	}
 
 	~HTMLScanner()
 	{
-		delete[] fileName;
+		
 	}
 
 	// get all html file names in the given folder
@@ -49,18 +36,13 @@ public:
 		do
 		{
 			// save this file name
-			fileName[size++] = findFileData.cFileName;
+			file_name.insert(file_name.length(), findFileData.cFileName);
 			// if there is no next file, stop
 		} while (FindNextFile(result, &findFileData));
 	}
 
-	int length()
+	int size() const
 	{
-		return size;
-	}
-
-	String & operator[](int k) const
-	{
-		return fileName[k];
+		return file_name.length();
 	}
 };

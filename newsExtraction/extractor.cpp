@@ -62,7 +62,6 @@ void Extractor::getData()
 	html.clear();
 }
 
-// here deal with mismatch
 void Extractor::checkTag(Stack<String> & s, Stack<String> & mis, String & tag)
 {
 	Stack<String> tem;
@@ -132,11 +131,8 @@ void Extractor::extractInfo()
 	int posSave;
 	// the number of current pos
 	int pos = 0;
-	// save a complete(hope so) sentence
-	String sentence;
 
 	state = FREE;
-
 
 	for (; pos < allData.length(); pos++)
 	{
