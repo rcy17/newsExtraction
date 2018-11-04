@@ -74,7 +74,7 @@ unsigned long long Dictionary::hash(const String & s)
 		for (int j = 0; j < 4; j++)
 		{
 			sum += unsigned char(s[i * 4 + j]) * mul;
-			mul *= 256;
+			mul <<= 4;
 		}
 		number += sum;
 	}
