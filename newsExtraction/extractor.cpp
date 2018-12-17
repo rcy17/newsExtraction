@@ -366,7 +366,7 @@ void Extractor::extractInfo()
 				if (statePast == INTAG)
 				{
 					String str = allData.substring(posSave, pos - posSave);
-					if (str == "post_time_source" || str == "ptime" || str == "ep-time-soure cDGray")
+					if (str == "post_time_source" || str == "ptime" || str == "ep-time-soure cDGray" || str== "article-source")
 					{
 						// if it's time stamp, ready to get
 						pos = allData.indexOf(">", pos);
@@ -376,7 +376,7 @@ void Extractor::extractInfo()
 						break;
 
 					}
-					if (str == "ne_article_source" || str == "author")
+					if (str == "ne_article_source" || str == "author" || str=="article-author")
 					{
 						// if it's source, ready to get
 						pos = allData.indexOf(">", pos);
@@ -385,7 +385,7 @@ void Extractor::extractInfo()
 						sourceTagPos = tagSave.length();
 						break;
 					}
-					if (str == "post_text" || str.match("end-text"))
+					if (str == "post_text" || str == "endText" ||str.match("end-text"))
 					{
 						// if it's content text, ready to extracte
 						pos = allData.indexOf(">", pos);
