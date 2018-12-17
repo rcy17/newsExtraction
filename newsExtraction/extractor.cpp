@@ -11,7 +11,7 @@ Extractor::Extractor()
 	outputPath.assign("./output/");
 	cout << R"(loading "in.dic", please waiting......)";
 	initDictionary();
-	cout << "\nloading finished!" << std::endl;
+	cout << "\nloading finished!\n";
 	initialize();
 }
 
@@ -560,15 +560,23 @@ inline String & reorganiseContent(String & s)
 void Extractor::outputInfo()
 {
 	// put out tittle, source, time and content
+#ifdef NOT_USE_STRAM
+	info = fopen((outputPath + mainName + String(".info")).getString(), "w");
+#else
 	info.open((outputPath + mainName + String(".info")).getString());
+#endif
 
-	info << tittle << std::endl;
-	info << reorganiseSource(source) << std::endl;
-	info << getTime(timeStamp) << std::endl;
-	info << reorganiseContent(content) << std::endl;
+	info << tittle;
+	info << reorganiseSource(source);
+	info << getTime(timeStamp);
+	info << reorganiseContent(content);
 
+#ifdef NOT_USE_STRAM
+	fclose(info);
+#else
 	info.close();
 	info.clear();
+#endif
 }
 
 void Extractor::initDictionary()
@@ -612,8 +620,12 @@ void Extractor::divideWords()
 	int contentLength = content.length();
 	String keyTry;
 	// output segementation result
+#ifdef NOT_USE_STRAM
+	txt = fopen((outputPath + mainName + String(".txt")).getString(),"w");
+#else
 	txt.open((outputPath + mainName + String(".txt")).getString());
-	txt << "以下为分词结果：" << std::endl;
+#endif
+	txt << String("以下为分词结果：");
 	// as the shortesti word has 4 byte
 	for (int pos = 0; pos < contentLength - 4; pos++)
 	{
@@ -623,7 +635,7 @@ void Extractor::divideWords()
 			keyTry = content.substring(pos, length);
 			if (dict.inDict(keyTry))
 			{
-				txt << keyTry << std::endl;
+				txt << keyTry;
 				// if it's stop word, ignore it
 				if (dict[keyTry] != STOP_WORD_FLAG)
 					dict[keyTry]++;
@@ -634,16 +646,21 @@ void Extractor::divideWords()
 			if (keyTry.isWord())
 			{
 				// if this is a English word, add it in dic
-				txt << keyTry << std::endl;
+				txt << keyTry;
 				dict.insert(keyTry, 1);
 				pos += length - 1;
 				break;
 			}
 		}
 	}
+#ifdef NOT_USE_STRAM
+	fclose(txt);
+#else
 	txt.close();
 	txt.clear();
+#endif
 }
+
 
 void Extractor::outputTxt()
 {
@@ -654,17 +671,29 @@ void Extractor::outputTxt()
 	int len = result.length();
 	// sort according to times
 	result.mergesort(0, len);
-	txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
-	txt << "\n以下为超过一次的非中文停用词词频统计：" << std::endl;
+#ifdef NOT_USE_STRAM
+	txt = fopen((outputPath + mainName + String(".txt")).getString(), "a");
+#else
+	//txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
+#endif
+	txt << String("\n以下为超过一次的非中文停用词词频统计：");
 	// output words
 	for (int i = 0; i < len; i++)
 	{
 		if (result.getValue(i) < 2)
 			break;
-		txt << result[i] << "\t\t" << result.getValue(i) << std::endl;
+#ifdef NOT_USE_STRAM
+		txt << result[i] << String("\t\t") << String(result.getValue(i));
+#else
+		txt << result[i] << String("\t\t") << result.getValue(i);
+#endif
 	}
+#ifdef NOT_USE_STRAM
+	fclose(txt);
+#else
 	txt.close();
 	txt.clear();
+#endif
 }
 
 void Extractor::output()

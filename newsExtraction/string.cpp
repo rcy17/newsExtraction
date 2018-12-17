@@ -7,11 +7,26 @@ String::String()
 	str = new char[capacity = defaultCapacity];
 	size = 0;
 }
-
+/*
 String::String(int capacity) :capacity(capacity)
 {
 	str = new char[capacity];
 	size = 0;
+}*/
+
+String::String(const int k)
+{
+	str = new char[capacity = defaultCapacity];
+	size = 0;
+	int tem = k;
+	if (!tem)
+		str[size++] = '0';
+	else
+		while (tem)
+		{
+			str[size++] = (tem % 10) + '0';
+			tem /= 10;
+		}
 }
 
 // constructor via a char array
@@ -258,4 +273,9 @@ const char * String::getString()
 	return str;
 }
 
+// get data without any modification
+const char * String::getData() const
+{
+	return str;
+}
 

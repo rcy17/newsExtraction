@@ -84,7 +84,7 @@ public:
 		return allKey[k];
 	}
 
-	int getValue(int k)
+	const int getValue(int k)
 	{
 		return allValue[k];
 	}

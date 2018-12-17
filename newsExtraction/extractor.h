@@ -38,8 +38,11 @@ private:
 
 	};
 	ifstream html;
+#ifdef NOT_USE_STRAM
+	FILE *info, *txt;
+#else
 	ofstream info,txt;
-	
+#endif
 	// for file name
 	String inputPath,outputPath,mainName,allData;
 	

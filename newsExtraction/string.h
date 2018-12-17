@@ -1,7 +1,12 @@
 #pragma once
 #include <iostream>
-#include <fstream>
 #define ERROR_INDEX -1
+#define NOT_USE_STRAM
+#ifdef NOT_USE_STRAM
+#pragma warning (disable:4996)
+//#else
+#include <fstream>
+#endif
 class String;
 String concat(const String & a, const String & b);
 
@@ -22,7 +27,9 @@ public:
 	// default constructor
 	String();
 
-	String(int capacity);
+	//String(int capacity);
+
+	String(const int k);
 
 	// constructor via a char array
 	String(const char * s);
@@ -107,6 +114,9 @@ public:
 	// try to use its char array directly
 	const char * getString();
 
+	// get data without any modification
+	const char * getData() const;
+
 	// now we can stream out a string easily
 	friend std::ostream & operator << (std::ostream &, const String &);
 
@@ -118,7 +128,9 @@ public:
 
 	// however, overload ofstream << is not easy, and istream << is already enough
 	// friend std::ofstream & operator << (std::ofstream &, const String &);
-
+#ifdef NOT_USE_STRAM
+	//friend FILE * operator<<(FILE * fp, String & s);
+#endif
 };
 
 class String;
@@ -137,7 +149,11 @@ inline std::ostream & operator << (std::ostream & stream, const  String & s)
 	for (i = 0; i < s.size; i++)
 		if (s[i] != '\n')
 			break;
+#ifdef NOT_USE_STRAM
 	stream << s.str + i;
+#else
+	stream << s.str + i << '\n';
+#endif
 	s[s.size] = c;
 	return stream;
 }
@@ -175,6 +191,15 @@ inline std::ifstream & operator >> (std::ifstream & stream, String & s)
 	}
 	return stream;
 }
+#ifdef NOT_USE_STRAM
+// given that stream input/output is too slow, i decide to use some basic api
+inline FILE * operator<<(FILE * fp,const String & s)
+{
+	fwrite(s.getData(), 1, s.length(), fp);
+	fputc('\n', fp);
+	return fp;
+}
+#endif
 
 
 // concat two string to get a new string
