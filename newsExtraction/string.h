@@ -52,6 +52,10 @@ public:
 
 	bool operator !=(const String & s);
 
+	bool operator < (const String & s);
+
+	bool operator > (const String & s);
+
 	// return true if String isn't empty
 	operator bool() const;
 

@@ -27,6 +27,9 @@
     <ClCompile Include="dictionary.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="avltree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stack.h">
@@ -48,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="configuration.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="avltree.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

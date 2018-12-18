@@ -76,6 +76,7 @@ public:
 	// pop the top element and return it
 	T & pop()
 	{
+		assert(size);
 		size--;
 		return *(--pTop);
 	}

@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="avltree.cpp" />
     <ClCompile Include="dictionary.cpp" />
     <ClCompile Include="extractor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="string.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="avltree.h" />
     <ClInclude Include="configuration.h" />
     <ClInclude Include="dictionary.h" />
     <ClInclude Include="extractor.h" />

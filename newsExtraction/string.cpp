@@ -97,6 +97,32 @@ bool String::operator ==(const String & s)
 	return true;
 }
 
+bool String::operator < (const String & s)
+{
+	int length = size;
+	if (s.size < s)
+		length = s.size;
+	for (int i = 0; i < length; i++)
+		if (str[i] < s[i])
+			return true;
+		else if (str[i] > s[i])
+			return false;
+	return size < s.size;
+}
+
+bool String::operator > (const String & s)
+{
+	int length = size;
+	if (s.size < s)
+		length = s.size;
+	for (int i = 0; i < length; i++)
+		if (str[i] > s[i])
+			return true;
+		else if (str[i] < s[i])
+			return false;
+	return size > s.size;
+}
+
 bool String::operator !=(const String & s)
 {
 	return !(*this == s);
