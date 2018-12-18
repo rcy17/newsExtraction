@@ -37,10 +37,11 @@ private:
 		INSOURCE,
 
 	};
-	ifstream html;
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	FILE *info, *txt;
+	FILE *html;
 #else
+	ifstream html;
 	ofstream info,txt;
 #endif
 	// for file name

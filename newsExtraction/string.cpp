@@ -87,6 +87,15 @@ void String::assign(const char * s)
 	}
 }
 
+// change capacity of string, which will clear the string
+void String::resize(int size)
+{
+	delete str;
+	capacity = size;
+	str = new char[capacity];
+	this->size = 0;
+}
+
 bool String::operator ==(const String & s)
 {
 	if (size != s.size)
@@ -100,7 +109,7 @@ bool String::operator ==(const String & s)
 bool String::operator < (const String & s)
 {
 	int length = size;
-	if (s.size < s)
+	if (s.size < size)
 		length = s.size;
 	for (int i = 0; i < length; i++)
 		if (str[i] < s[i])
@@ -113,7 +122,7 @@ bool String::operator < (const String & s)
 bool String::operator > (const String & s)
 {
 	int length = size;
-	if (s.size < s)
+	if (s.size < size)
 		length = s.size;
 	for (int i = 0; i < length; i++)
 		if (str[i] > s[i])

@@ -4,6 +4,7 @@
 using std::cout;
 
 #define STOP_WORD_FLAG -1
+#define SCAN_ENGLISH_WORD 0
 
 Extractor::Extractor()
 {
@@ -51,15 +52,23 @@ void Extractor::getData()
 {
 	if (!inputGood)
 		return;
+#ifdef NOT_USE_STREAM
+	html = fopen((inputPath + mainName + String(".html")).getString(), "rb");
+#else
 	html.open((inputPath + mainName + String(".html")).getString());
+#endif
 	if (!html)
 	{
 		inputGood = false;
 		return;
 	}
 	html >> allData;
+#ifdef NOT_USE_STREAM
+	fclose(html);
+#else
 	html.close();
 	html.clear();
+#endif
 }
 
 void Extractor::checkTag(Stack<String> & s, Stack<String> & mis, String & tag)
@@ -136,11 +145,15 @@ void Extractor::extractInfo()
 
 	for (; pos < allData.length(); pos++)
 	{
-		// DEBUG code
-		if (pos == 117775)
+		// DEBUG code, it will be omited in release
+		/*if (pos % 10000 == 0)
 		{
-			int a = 0;
+			printf("%d\n", pos);
 		}
+		else if (pos % 1000 ==0)
+		{
+			printf("%d\n", pos);
+		}*/
 		switch (state)
 		{
 		case FREE:
@@ -169,7 +182,7 @@ void Extractor::extractInfo()
 				posSave = allData.indexOf("-->", pos);
 				if (posSave == ERROR_INDEX)
 				{
-
+					printf("error! <!-- without -->! ");
 				}
 				// ignore comments
 				posSave += 3;
@@ -560,18 +573,19 @@ inline String & reorganiseContent(String & s)
 void Extractor::outputInfo()
 {
 	// put out tittle, source, time and content
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	info = fopen((outputPath + mainName + String(".info")).getString(), "w");
 #else
 	info.open((outputPath + mainName + String(".info")).getString());
 #endif
+	assert(info);
 
-	info << tittle;
-	info << reorganiseSource(source);
-	info << getTime(timeStamp);
-	info << reorganiseContent(content);
+	info << tittle << String("\n");
+	info << reorganiseSource(source) << String("\n");
+	info << getTime(timeStamp) << String("\n");
+	info << reorganiseContent(content) << String("\n");
 
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	fclose(info);
 #else
 	info.close();
@@ -620,12 +634,12 @@ void Extractor::divideWords()
 	int contentLength = content.length();
 	String keyTry;
 	// output segementation result
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	txt = fopen((outputPath + mainName + String(".txt")).getString(),"w");
 #else
 	txt.open((outputPath + mainName + String(".txt")).getString());
 #endif
-	txt << String("以下为分词结果：");
+	txt << String("以下为分词结果：") << String("\n");
 	// as the shortesti word has 4 byte
 	for (int pos = 0; pos < contentLength - 4; pos++)
 	{
@@ -635,7 +649,7 @@ void Extractor::divideWords()
 			keyTry = content.substring(pos, length);
 			if (dict.inDict(keyTry))
 			{
-				txt << keyTry;
+				txt << keyTry << String("\n");
 				// if it's stop word, ignore it
 				if (dict[keyTry] != STOP_WORD_FLAG)
 					dict[keyTry]++;
@@ -643,17 +657,19 @@ void Extractor::divideWords()
 				pos += length - 1;
 				break;
 			}
+#if SCAN_ENGLISH_WORD
 			if (keyTry.isWord())
 			{
 				// if this is a English word, add it in dic
-				txt << keyTry;
+				txt << keyTry << String("\n");
 				dict.insert(keyTry, 1);
 				pos += length - 1;
 				break;
 			}
+#endif
 		}
 	}
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	fclose(txt);
 #else
 	txt.close();
@@ -671,24 +687,24 @@ void Extractor::outputTxt()
 	int len = result.length();
 	// sort according to times
 	result.mergesort(0, len);
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	txt = fopen((outputPath + mainName + String(".txt")).getString(), "a");
 #else
 	//txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
 #endif
-	txt << String("\n以下为超过一次的非中文停用词词频统计：");
+	txt << String("\n以下为超过一次的非中文停用词词频统计：") + String("\n");
 	// output words
 	for (int i = 0; i < len; i++)
 	{
 		if (result.getValue(i) < 2)
 			break;
-#ifdef NOT_USE_STRAM
-		txt << result[i] << String("\t\t") << String(result.getValue(i));
+#ifdef NOT_USE_STREAM
+		txt << result[i] << String("\t\t") + String(result.getValue(i)) + String("\n");
 #else
 		txt << result[i] << String("\t\t") << result.getValue(i);
 #endif
 	}
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	fclose(txt);
 #else
 	txt.close();

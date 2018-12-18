@@ -1,7 +1,6 @@
 #pragma once
 #include <fstream>
 #include "string.h"
-using std::ifstream;
 
 class Configuration
 {
@@ -10,7 +9,7 @@ private:
 public:
 	Configuration():autoScan(false),applyStopWord(false),invalidTagReport(false)
 	{
-		ifstream file("config.ini");
+		FILE * file(fopen("config.ini", "r"));
 		file >> configDate;
 	}
 

@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #define ERROR_INDEX -1
-#define NOT_USE_STRAM
-#ifdef NOT_USE_STRAM
+#define NOT_USE_STREAM
+#ifdef NOT_USE_STREAM
 #pragma warning (disable:4996)
 //#else
 #include <fstream>
@@ -47,6 +47,9 @@ public:
 
 	// assign a char array to string
 	void assign(const char * s);
+
+	// change capacity of string, which will clear the string
+	void resize(int size);
 
 	bool operator ==(const String & s);
 
@@ -128,12 +131,13 @@ public:
 	friend std::istream & operator >> (std::istream &, String &);
 
 	// and file operation is also important
-	friend std::ifstream & operator >> (std::ifstream &, String &);
+	//friend std::ifstream & operator >> (std::ifstream &, String &);
 
 	// however, overload ofstream << is not easy, and istream << is already enough
 	// friend std::ofstream & operator << (std::ofstream &, const String &);
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	//friend FILE * operator<<(FILE * fp, String & s);
+	friend FILE * operator>>(FILE *fp, String & s);
 #endif
 };
 
@@ -153,7 +157,7 @@ inline std::ostream & operator << (std::ostream & stream, const  String & s)
 	for (i = 0; i < s.size; i++)
 		if (s[i] != '\n')
 			break;
-#ifdef NOT_USE_STRAM
+#ifdef NOT_USE_STREAM
 	stream << s.str + i;
 #else
 	stream << s.str + i << '\n';
@@ -179,6 +183,7 @@ inline std::istream & operator >> (std::istream & stream, String & s)
 	return stream;
 }
 
+/*
 // overload ifstream >> string to read data from file until EOF
 inline std::ifstream & operator >> (std::ifstream & stream, String & s)
 {
@@ -194,15 +199,31 @@ inline std::ifstream & operator >> (std::ifstream & stream, String & s)
 		s.add(c);
 	}
 	return stream;
-}
-#ifdef NOT_USE_STRAM
+}*/
+
+#ifdef NOT_USE_STREAM
 // given that stream input/output is too slow, i decide to use some basic api
 inline FILE * operator<<(FILE * fp,const String & s)
 {
 	fwrite(s.getData(), 1, s.length(), fp);
-	fputc('\n', fp);
 	return fp;
 }
+
+
+// also, use some better method to read data
+inline FILE * operator>>(FILE *fp, String & s)
+{
+	// first get size of file
+	fseek(fp, 0, SEEK_END);
+	int length = ftell(fp);
+	// then read all data
+	fseek(fp, 0, SEEK_SET);
+	s.resize(length + 5);
+	fread(s.str, 1, length, fp);
+	s.size = length;
+	return fp;
+}
+
 #endif
 
 
