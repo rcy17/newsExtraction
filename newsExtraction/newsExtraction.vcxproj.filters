@@ -30,6 +30,9 @@
     <ClCompile Include="avltree.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="invertedfile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stack.h">
@@ -54,6 +57,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="avltree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="documentlist.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="invertedfile.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,7 @@
 using std::cout;
 
 #define STOP_WORD_FLAG -1
-#define SCAN_ENGLISH_WORD 0
+#define SCAN_ENGLISH_WORD 1
 
 Extractor::Extractor()
 {
@@ -565,8 +565,14 @@ inline String & reorganiseContent(String & s)
 		}
 	for (int i = 0; i < s.length() - 1; i++)
 		if (s[i] == '\n')
-			while (i + 1 < s.length() && s[i + 1] == '\n')
+			while (i + 1 < s.length() && (s[i + 1] == '\n'))
 				s.remove(i + 1);
+		else if(s[i]==' ')
+			while (i + 5 < s.length() && (s[i + 5] == ' '))
+				s.remove(i + 5);
+		/*else if (s[i] == '\t')
+			while (i + 1 < s.length() && (s[i + 1] == '\t'))
+				s.remove(i + 1);*/
 	return s;
 }
 

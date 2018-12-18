@@ -2,25 +2,41 @@
 #include "string.h"
 #include "extractor.h"
 #include "configuration.h"
+#include "filescanner.h"
+#include "invertedfile.h"
 using namespace std;
 
-#define AUTO_SCAN
 
-#include "filescanner.h"
+Configuration config;
+void segmentWord();
+InvertedFile files;
+
+#include <ctime>
 
 int main()
 {
-	String fileName;
-	Extractor extractor;
-	Configuration config;
+	auto start = clock();
 	// first load all configuration and use them
 	config.load();
+	if (config.segmentWord)
+		segmentWord();
+	files.loadDict();
+	auto finish = clock();
+	printf("%d", finish - start);
+	return 0;
+}
+
+void segmentWord()
+{
+	// if needed, segmentWord again
+	String fileName;
+	Extractor extractor;
 	extractor.set(config.applyStopWord, config.invalidTagReport);
 	if (config.autoScan)
 	{
 		// in auto scanning, this program will scan all html files in ./input/
 		HTMLScanner scanner;
-		while(!scanner.file_name.empty())
+		while (!scanner.file_name.empty())
 		{
 			fileName = scanner.file_name.del(0);
 			cout << "now start to extract from " << fileName << ", please wating..." << endl;
@@ -28,12 +44,6 @@ int main()
 		}
 		// now give some message before exiting
 		cout << "all done!" << endl;
-		for (int i = 0; i < 3; i++)
-		{
-			cout << 3 - i << " second later will it exit..." << endl;
-			Sleep(1000);
-		}
-		cout << "exit!";
 	}
 	else
 	{
@@ -58,6 +68,4 @@ int main()
 			cout << "input filename or input exit or ctrl + z to exit:";
 		}
 	}
-
-	return 0;
 }

@@ -9,6 +9,13 @@ AVLNode::AVLNode() :lchild(nullptr), rchild(nullptr), parent(nullptr), height(0)
 
 }
 
+AVLNode::AVLNode(String key, const AVLData data):key(key),data(data),
+	lchild(nullptr), rchild(nullptr), parent(nullptr), height(0)
+{
+
+}
+
+
 // copy constructor
 AVLNode::AVLNode(const AVLNode & node) : key(node.key), data(node.data),
 height(0), lchild(nullptr), rchild(nullptr)
@@ -47,10 +54,14 @@ bool AVLNode::isBalenced()
 
 void AVLNode::update()
 {
-	if (lchild)
-		height = lchild->height + 1;
-	if (rchild && rchild->height >= height)
-		height = rchild->height + 1;
+	if (lchild || rchild)
+	{
+		height = lchild ? lchild->height + 1 : 0;
+		if (rchild && rchild->height >= height)
+			height = rchild->height + 1;
+	}
+	else
+		height = 0;
 }
 
 /************************* methods for AVLTree class ******************/
@@ -74,7 +85,7 @@ void AVLTree::clearTree()
 }
 
 // insert a new node in the tree
-bool AVLTree::insert(AVLNode & node)
+bool AVLTree::insert(const AVLNode & node)
 {
 	AVLNode * current = root;
 	AVLNode * pnode = new AVLNode(node);
@@ -176,8 +187,8 @@ inline void rotate(AVLNode * p1, AVLNode * p2, AVLNode * p3,
 	p3->lchild = t3,p3->rchild = t4;
 	p1->parent = p3->parent = p2;
 	p1->update();
-	p2->update();
 	p3->update();
+	p2->update();
 	connect(p1, t1);
 	connect(p1, t2);
 	connect(p3, t3);

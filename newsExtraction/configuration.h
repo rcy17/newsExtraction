@@ -7,7 +7,8 @@ class Configuration
 private:
 	String configDate;
 public:
-	Configuration():autoScan(false),applyStopWord(false),invalidTagReport(false)
+	Configuration():autoScan(false),applyStopWord(false),
+		invalidTagReport(false),segmentWord(false)
 	{
 		FILE * file(fopen("config.ini", "r"));
 		file >> configDate;
@@ -45,9 +46,16 @@ public:
 				if (configDate[pos] == '1')
 					invalidTagReport = true;
 			}
+			else if (configDate.substring(pos, 13) == "segment_words")
+			{
+				pos += 13;
+				while (++pos, configDate[pos] == ' ' || configDate[pos] == '\t');
+				if (configDate[pos] == '1')
+					segmentWord = true;
+			}
 			else
 				pos++;
 	}
 
-	bool autoScan, applyStopWord, invalidTagReport;
+	bool autoScan, applyStopWord, invalidTagReport,segmentWord;
 };

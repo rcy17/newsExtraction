@@ -29,7 +29,7 @@ public:
 	List(const List & l)
 	{
 		head = new Node<T>;
-		Node<T> *s = l.head, p = head, q;
+		Node<T> *s = l.head, *p = head, *q;
 		while (s->next)
 		{
 			q = new Node<T>;
@@ -217,3 +217,4 @@ public:
 	}
 
 };
+

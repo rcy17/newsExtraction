@@ -1,10 +1,12 @@
 #pragma once
 #include "string.h"
 
-struct AVLData
+/*struct AVLData
 {
-	int k;
-};
+	int index;
+};*/
+
+typedef int AVLData;
 
 // subclass for tree
 class AVLNode
@@ -16,6 +18,8 @@ public:
 	int height;
 
 	AVLNode();
+
+	AVLNode(String key,const AVLData data);
 
 	// copy constructor
 	AVLNode(const AVLNode & node);
@@ -50,7 +54,7 @@ public:
 	void clearTree();
 
 	// insert a new node in the tree
-	bool insert(AVLNode & node);
+	bool insert(const AVLNode & node);
 
 	// find a node by data
 	AVLNode * search(const String & data);

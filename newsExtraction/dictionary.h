@@ -12,8 +12,6 @@ class Dictionary
 private:
 	String * key;
 	int *value, capacity;
-	// a 4k+3 prime as capacity
-	const static int mod = 500111;
 
 	// get a long long number by given String
 	unsigned long long hash(const String &);
@@ -27,6 +25,9 @@ private:
 	// save how many keys in this dictionary
 	int size;
 public:
+	// a 4k+3 prime as capacity
+	const static int mod = 500111;
+
 	Dictionary();
 
 	~Dictionary();
