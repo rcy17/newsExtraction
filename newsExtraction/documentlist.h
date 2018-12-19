@@ -8,8 +8,7 @@ class News
 {
 public:
 	int index;
-	String name;
-	String Tittle;
+	String tittle;
 	String source;
 	String time;
 	String content;
@@ -105,6 +104,12 @@ public:
 		return head == tail;
 	}
 
+	// get the first node in list
+	DocNode * first() const
+	{
+		return head->next;
+	}
+
 	// update order in the list
 	void update(DocNode * p)
 	{
@@ -120,6 +125,7 @@ public:
 		}
 	}
 
+	// add a new file(index) in list
 	void add(int index, int times)
 	{
 		DocNode * p = head->next;
@@ -132,6 +138,7 @@ public:
 		update(head->next);
 	}
 
+	// search a file's information by index
 	Document search(int index)
 	{
 		DocNode *p = head;
@@ -145,6 +152,7 @@ public:
 		return Document();
 	}
 
+	// edit a file's tiems
 	bool edit(int index, int times)
 	{
 		DocNode * p = head, *q;
@@ -174,6 +182,7 @@ public:
 		return false;
 	}
 
+	// remove a file from the list
 	bool remove(int index)
 	{
 		DocNode * p = head, *q;

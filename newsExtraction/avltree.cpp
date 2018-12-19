@@ -4,7 +4,8 @@
 
 /************************* methods for AVLNode class ******************/
 
-AVLNode::AVLNode() :lchild(nullptr), rchild(nullptr), parent(nullptr), height(0)
+AVLNode::AVLNode() :lchild(nullptr), rchild(nullptr),
+	parent(nullptr), height(0)
 {
 
 }
@@ -66,7 +67,7 @@ void AVLNode::update()
 
 /************************* methods for AVLTree class ******************/
 
-AVLTree::AVLTree() :root(nullptr)
+AVLTree::AVLTree() :root(nullptr),size(0)
 {
 
 }
@@ -79,41 +80,52 @@ AVLTree::~AVLTree()
 // clear the whole tree
 void AVLTree::clearTree()
 {
-	root->clear();
-	delete root;
-	root = nullptr;
+	if (root)
+	{
+		root->clear();
+		delete root;
+		root = nullptr;
+	}
+}
+
+// get the size of tree
+int AVLTree::getSize() const
+{
+	return size;
 }
 
 // insert a new node in the tree
-bool AVLTree::insert(const AVLNode & node)
+AVLNode * AVLTree::insert(const AVLNode & node)
 {
 	AVLNode * current = root;
-	AVLNode * pnode = new AVLNode(node);
+	AVLNode * pnode, * save;
 	if (!root)
 	{
-		root = pnode;
+		root = pnode = new AVLNode(node);
 	}
 	else
 	{
 		while (1)
 		{
-			if (current->key < pnode->key)
+			if (current->key < node.key)
 			{
 				if (current->rchild)
 					current = current->rchild;
 				else
 				{
+					pnode = new AVLNode(node);
 					current->rchild = pnode;
 					pnode->parent = current;
 					break;
 				}
 			}
-			else if (current->key > pnode->key)
+			else if (current->key > node.key)
 			{
 				if (current->lchild)
 					current = current->lchild;
 				else
 				{
+					pnode = new AVLNode(node);
 					current->lchild = pnode;
 					pnode->parent = current;
 					break;
@@ -121,9 +133,10 @@ bool AVLTree::insert(const AVLNode & node)
 			}
 			else
 				// if this node has been in the tree, insert failed
-				return false;
+				return nullptr;
 		}
 	}
+	save = pnode;
 	while (pnode)
 	{
 		// if it's unbalenced, adjust it and break the loop
@@ -145,7 +158,8 @@ bool AVLTree::insert(const AVLNode & node)
 		pnode->update();
 		pnode = pnode->parent;
 	}
-	return true;
+	size++;
+	return save;
 }
 
 // find a node by key
@@ -308,7 +322,7 @@ bool AVLTree::remove(const String & key)
 		pnode->update();
 		pnode = pnode->parent;
 	}
-
+	size--;
 	return true;
 }
 
@@ -322,3 +336,17 @@ bool AVLTree::edit(const String & key, const AVLData & data)
 	return true;
 }
 
+// here are some api to be compatible with hash
+bool AVLTree::inDict(const String & word)
+{
+	return search(word);
+}
+
+// return index of a word
+int AVLTree::getValue(const String & word)
+{
+	auto result = search(word);
+	if (!result)
+		return -1;
+	return result->data;
+}

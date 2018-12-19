@@ -25,8 +25,23 @@ String::String(const int k)
 		while (tem)
 		{
 			str[size++] = (tem % 10) + '0';
+			assert(size < capacity);
 			tem /= 10;
 		}
+	for (int i = 0; i < size / 2; i++)
+	{
+		tem = str[i];
+		str[i] = str[size - 1 - i];
+		str[size - 1 - i] = tem;
+	}
+	str[size] = '\0';
+}
+
+String::String(const char c)
+{
+	str = new char[capacity = defaultCapacity];
+	str[0] = c;
+	str[size = 1] = '\0';
 }
 
 // constructor via a char array
@@ -70,7 +85,7 @@ int String::length() const
 void String::enlarge()
 {
 	char * s = new char[capacity *= 2 + 1];
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i <= size; i++)
 		s[i] = str[i];
 	delete[]str;
 	str = s;
@@ -85,6 +100,7 @@ void String::assign(const char * s)
 		if (size == capacity)
 			enlarge();
 	}
+	str[size] = '\0';
 }
 
 // change capacity of string, which will clear the string
@@ -94,6 +110,7 @@ void String::resize(int size)
 	capacity = size;
 	str = new char[capacity];
 	this->size = 0;
+	str[0] = '\0';
 }
 
 bool String::operator ==(const String & s)
@@ -173,6 +190,7 @@ String & String::concat(const String & s)
 	for (int i = size; i < total; i++)
 		str[i] = s[i - size];
 	size = total;
+	str[size] = '\0';
 	return *this;
 }
 
@@ -188,11 +206,12 @@ String & String::concat(const char *s)
 		if (size == capacity)
 			enlarge();
 	}
+	str[size] = '\0';
 	return *this;
 }
 
 // get a substring by given position and size
-String String::substring(int pos, int len)
+String String::substring(int pos, int len) const
 {
 	String s;
 	if (!len || len > size - pos)
@@ -204,6 +223,7 @@ String String::substring(int pos, int len)
 		if (s.size == s.capacity)
 			s.enlarge();
 	}
+	s[s.size] = 0;
 	return s;
 }
 
@@ -218,6 +238,7 @@ void String::add(char c)
 	str[size++] = c;
 	if (size == capacity)
 		enlarge();
+	str[size] = '\0';
 }
 
 // remove a char by rank
@@ -225,7 +246,7 @@ bool String::remove(int rank)
 {
 	if (rank >= size)
 		return false;
-	for (int i = rank; i < size - 1; i++)
+	for (int i = rank; i < size; i++)
 		str[i] = str[i + 1];
 	size--;
 	return true;
@@ -250,6 +271,21 @@ void String::clear()
 	size = 0;
 }
 
+// return a string without space
+String String::removeSpace() const
+{
+	String s;
+	for (int i = 0; i < size; i++)
+	{
+		if (str[i] != ' ' && str[i] != '\n' && str[i] != '\r')
+		{
+			s.add(str[i]);
+
+		}
+	}
+	return s;
+}
+
 // match for the given range
 bool String::match(const String & s, int start, int over)
 {
@@ -264,6 +300,12 @@ bool String::match(const String & s, int start, int over)
 			return false;
 	}
 	return true;
+}
+
+// match for news tittle, has fault-tolerance
+bool String::tittleMatch(const String & s) const
+{
+	return removeSpace() == s.removeSpace();
 }
 
 int * String::buildNext(const String & s)
@@ -302,9 +344,9 @@ int String::indexOf(const String & s, int position)
 }
 
 // try to use its char array directly
-const char * String::getString()
+const char * String::getString() const
 {
-	str[size] = '\0';
+	//str[size] = '\0';
 	return str;
 }
 

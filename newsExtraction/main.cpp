@@ -16,13 +16,19 @@ InvertedFile files;
 int main()
 {
 	auto start = clock();
+
 	// first load all configuration and use them
 	config.load();
 	if (config.segmentWord)
 		segmentWord();
-	files.loadDict();
+
+	files.initialize();
+	files.query();
+
+
 	auto finish = clock();
-	printf("%d", finish - start);
+	if (config.countTime)
+		printf("time used in main function: %d ms", finish - start);
 	return 0;
 }
 

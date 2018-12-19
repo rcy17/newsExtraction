@@ -6,6 +6,9 @@ using std::cout;
 #define STOP_WORD_FLAG -1
 #define SCAN_ENGLISH_WORD 1
 
+/************************* methods for Extractor class *********************/
+
+
 Extractor::Extractor()
 {
 	inputPath.assign("./input/");
@@ -145,15 +148,6 @@ void Extractor::extractInfo()
 
 	for (; pos < allData.length(); pos++)
 	{
-		// DEBUG code, it will be omited in release
-		/*if (pos % 10000 == 0)
-		{
-			printf("%d\n", pos);
-		}
-		else if (pos % 1000 ==0)
-		{
-			printf("%d\n", pos);
-		}*/
 		switch (state)
 		{
 		case FREE:
@@ -645,7 +639,7 @@ void Extractor::divideWords()
 #else
 	txt.open((outputPath + mainName + String(".txt")).getString());
 #endif
-	txt << String("以下为分词结果：") << String("\n");
+	txt << String("分词结果:") + String("\n");
 	// as the shortesti word has 4 byte
 	for (int pos = 0; pos < contentLength - 4; pos++)
 	{
@@ -683,7 +677,6 @@ void Extractor::divideWords()
 #endif
 }
 
-
 void Extractor::outputTxt()
 {
 	if (applyStopWord)
@@ -698,7 +691,7 @@ void Extractor::outputTxt()
 #else
 	//txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
 #endif
-	txt << String("\n以下为超过一次的非中文停用词词频统计：") + String("\n");
+	txt << String("\n词频统计:") + String("\n");
 	// output words
 	for (int i = 0; i < len; i++)
 	{

@@ -3,6 +3,11 @@ newsExtraction/output
 newsExtraction/input
 newsExtraction/input2
 newsExtraction/input1
+newsExtraction/query1.txt
+newsExtraction/query2.txt
+newsExtraction/result1.txt
+newsExtraction/result2.txt
+
 
 
 ## Ignore Visual Studio temporary files, build results, and

@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <cassert>
 #define ERROR_INDEX -1
 #define NOT_USE_STREAM
 #ifdef NOT_USE_STREAM
@@ -27,7 +28,7 @@ public:
 	// default constructor
 	String();
 
-	//String(int capacity);
+	String(const char c);
 
 	String(const int k);
 
@@ -78,7 +79,7 @@ public:
 	String & concat(const char *s);
 
 	// get a substring by given position and size
-	String substring(int pos = 0, int len = 0);
+	String substring(int pos = 0, int len = 0) const;
 
 	String operator + (const String & s);
 
@@ -93,6 +94,9 @@ public:
 
 	// clear the string (lazy deletion)
 	void clear();
+
+	// return a string without space
+	String removeSpace() const;
 
 	// match for the given range
 	bool match(const String & s, int start = 0, int over = 0);
@@ -115,11 +119,14 @@ public:
 		return flag;
 	}
 
+	// match for news tittle, has fault-tolerance
+	bool tittleMatch(const String & s) const;
+
 	// use kmp to get the position of a sub string, it will after the given position
 	int indexOf(const String & s, int position = 0);
 
 	// try to use its char array directly
-	const char * getString();
+	const char * getString() const;
 
 	// get data without any modification
 	const char * getData() const;

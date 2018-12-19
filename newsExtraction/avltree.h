@@ -40,9 +40,8 @@ class AVLTree
 {
 private:
 	
-	
-
 	AVLNode * root;
+	int size;
 
 public:
 
@@ -53,12 +52,14 @@ public:
 	// clear the whole tree
 	void clearTree();
 
+	// get the size of tree
+	int getSize() const;
+
 	// insert a new node in the tree
-	bool insert(const AVLNode & node);
+	AVLNode * insert(const AVLNode & node);
 
 	// find a node by data
 	AVLNode * search(const String & data);
-
 
 	// adjust the tree to balance
 	AVLNode * adjust(AVLNode * pnode);
@@ -68,4 +69,11 @@ public:
 
 	// edit a node's information by key, return true if node exits
 	bool edit(const String & key,const AVLData & data);
+
+	// here are some api to be compatible with hash
+	bool inDict(const String & word);
+
+	// return index of a word
+	int getValue(const String & word);
+
 };
