@@ -3,11 +3,21 @@
 
 /************************* methods for InvertedFile class *********************/
 
+// use some macros to simplify transformation from AVL tree to hash
+#if TREE_VS_HASH
+#define DICT_PAIR(a,b) AVLNode(a,b)
+#define RESULT_ERROR(result) (!result)
+#define RESULT_INDEX(result) result->data
+#else
+#define DICT_PAIR(a,b) a , b
+#define RESULT_ERROR(result) (result == DICTIONARY_WRONG_RETURN)
+#define RESULT_INDEX(result) result
+#endif
+
 InvertedFile::InvertedFile()
 {
 
 }
-
 
 InvertedFile::~InvertedFile()
 {
@@ -34,13 +44,14 @@ void InvertedFile::loadDict()
 	{
 		if (s[pos] == '\n')
 		{
-			dict.insert(AVLNode(s.substring(posSave, pos - posSave), wordCount++));
+			
+			dict.insert(DICT_PAIR(s.substring(posSave, pos - posSave), wordCount++));
 			posSave = pos + 1;
 		}
 		pos++;
 	}
 	if (posSave != pos)
-		dict.insert(AVLNode(s.substring(posSave, pos - posSave), wordCount++));
+		dict.insert(DICT_PAIR(s.substring(posSave, pos - posSave), wordCount++));
 
 }
 
@@ -138,6 +149,7 @@ void InvertedFile::loadTxt(int index)
 	}
 }
 
+
 // add word and times in doclist
 void InvertedFile::addWord(String & word, String & number, int index)
 {
@@ -147,13 +159,14 @@ void InvertedFile::addWord(String & word, String & number, int index)
 		times *= 10;
 		times += number[i] - '0';
 	}
+
 	auto result = dict.search(word);
-	if (!result)
+	if (RESULT_ERROR(result))
 	{
-		result = dict.insert(AVLNode(word, dict.getSize()));
+		result = dict.insert(DICT_PAIR(word, dict.getSize()));
 		assert(result);
 	}
-	docList[result->data].add(index, times);
+	docList[RESULT_INDEX(result)].add(index, times);
 }
 
 // do all query operation

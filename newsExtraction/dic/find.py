@@ -1,5 +1,6 @@
 with open("out.dic","rb") as fp:
     lines = fp.readlines()
+print(len(lines))
 #print(lines[0])
 #print(lines[0].decode("gbk"))
 while True:

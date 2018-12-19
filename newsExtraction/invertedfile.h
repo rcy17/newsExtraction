@@ -3,8 +3,8 @@
 #include "avltree.h"
 #include "dictionary.h"
 
-// use avl tree or use hash
-#define USE_AVL_TREE 1
+// use avl tree or use hash, 1->avl tree / 0->hash
+#define TREE_VS_HASH 1
 
 class InvertedFile
 {
@@ -12,10 +12,10 @@ private:
 	// amount of htmls
 	static const int FILEAMOUNT = 781;
 
-#ifdef USE_AVL_TREE
+#if TREE_VS_HASH
 	AVLTree dict;
 #else
-
+	Dictionary dict;
 #endif
 	// doclists for all words in dict(including avltree or hash)
 	DocList docList[Dictionary::mod];

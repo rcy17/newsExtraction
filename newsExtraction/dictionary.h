@@ -34,7 +34,7 @@ public:
 
 	// insert a string in dictionary, return false if dictionary is full
 	// if key is already in the dictionary, just reset value
-	bool insert(const String &, const int n = 0);
+	int insert(const String &, const int n = 0);
 
 	// set a key's value, if this key isn't in the dictionary, return false
 	bool setValue(const String&, const int n = 0);
@@ -48,14 +48,18 @@ public:
 	// get value for the given key
 	int getValue(const String &);
 
+	// the same as getValue
+	int search(const String &);
+
 	// clear values, but keys are still here
 	void clear();
 
 	// get all nonzero value key and value
 	Data getAll();
 
-	// set value or
-};
+	// get size
+	int getSize() const;
+}; 
 
 
 

@@ -1,11 +1,6 @@
 #pragma once
 #include "string.h"
 
-/*struct AVLData
-{
-	int index;
-};*/
-
 typedef int AVLData;
 
 // subclass for tree
@@ -59,7 +54,7 @@ public:
 	AVLNode * insert(const AVLNode & node);
 
 	// find a node by data
-	AVLNode * search(const String & data);
+	AVLNode * search(const String & key);
 
 	// adjust the tree to balance
 	AVLNode * adjust(AVLNode * pnode);

@@ -15,20 +15,20 @@ Dictionary::~Dictionary()
 }
 
 
-bool Dictionary::insert(const String & s, const int n)
+int Dictionary::insert(const String & s, const int n)
 {
 	if (!s.length())
-		// return false if input wrong string
-		return false;
+		// return error if input wrong string
+		return DICTIONARY_WRONG_RETURN;
 	int k = getVacancy(hash(s) % mod);
 	if (k == DICTIONARY_WRONG_RETURN)
-		// return false if it's already full
-		return false;
+		// return error if it's already full
+		return DICTIONARY_WRONG_RETURN;
 	// otherwise insert it
 	key[k] = s;
 	value[k] = n;
 	size++;
-	return true;
+	return n;
 }
 
 bool Dictionary::setValue(const String & s, const int n)
@@ -167,6 +167,12 @@ int Dictionary::getValue(const String & s)
 		return value[rank];
 }
 
+// the same as getValue
+int Dictionary::search(const String & key)
+{
+	return getValue(key);
+}
+
 void Dictionary::clear()
 {
 	for (int i = 0; i < capacity; i++)
@@ -186,4 +192,10 @@ Data Dictionary::getAll()
 			// push key and value to return
 			tem.push(key[i], value[i]);
 	return tem;
+}
+
+// get size
+int Dictionary::getSize() const
+{
+	return size;
 }

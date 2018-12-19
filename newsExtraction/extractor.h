@@ -37,13 +37,8 @@ private:
 		INSOURCE,
 
 	};
-#ifdef NOT_USE_STREAM
 	FILE *info, *txt;
 	FILE *html;
-#else
-	ifstream html;
-	ofstream info,txt;
-#endif
 	// for file name
 	String inputPath,outputPath,mainName,allData;
 	

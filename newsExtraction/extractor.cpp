@@ -55,23 +55,15 @@ void Extractor::getData()
 {
 	if (!inputGood)
 		return;
-#ifdef NOT_USE_STREAM
 	html = fopen((inputPath + mainName + String(".html")).getString(), "rb");
-#else
-	html.open((inputPath + mainName + String(".html")).getString());
-#endif
+
 	if (!html)
 	{
 		inputGood = false;
 		return;
 	}
 	html >> allData;
-#ifdef NOT_USE_STREAM
 	fclose(html);
-#else
-	html.close();
-	html.clear();
-#endif
 }
 
 void Extractor::checkTag(Stack<String> & s, Stack<String> & mis, String & tag)
@@ -573,11 +565,8 @@ inline String & reorganiseContent(String & s)
 void Extractor::outputInfo()
 {
 	// put out tittle, source, time and content
-#ifdef NOT_USE_STREAM
 	info = fopen((outputPath + mainName + String(".info")).getString(), "w");
-#else
-	info.open((outputPath + mainName + String(".info")).getString());
-#endif
+
 	assert(info);
 
 	info << tittle << String("\n");
@@ -585,12 +574,7 @@ void Extractor::outputInfo()
 	info << getTime(timeStamp) << String("\n");
 	info << reorganiseContent(content) << String("\n");
 
-#ifdef NOT_USE_STREAM
 	fclose(info);
-#else
-	info.close();
-	info.clear();
-#endif
 }
 
 void Extractor::initDictionary()
@@ -634,11 +618,8 @@ void Extractor::divideWords()
 	int contentLength = content.length();
 	String keyTry;
 	// output segementation result
-#ifdef NOT_USE_STREAM
 	txt = fopen((outputPath + mainName + String(".txt")).getString(),"w");
-#else
-	txt.open((outputPath + mainName + String(".txt")).getString());
-#endif
+
 	txt << String("分词结果:") + String("\n");
 	// as the shortesti word has 4 byte
 	for (int pos = 0; pos < contentLength - 4; pos++)
@@ -669,12 +650,7 @@ void Extractor::divideWords()
 #endif
 		}
 	}
-#ifdef NOT_USE_STREAM
 	fclose(txt);
-#else
-	txt.close();
-	txt.clear();
-#endif
 }
 
 void Extractor::outputTxt()
@@ -686,29 +662,17 @@ void Extractor::outputTxt()
 	int len = result.length();
 	// sort according to times
 	result.mergesort(0, len);
-#ifdef NOT_USE_STREAM
 	txt = fopen((outputPath + mainName + String(".txt")).getString(), "a");
-#else
-	//txt.open((outputPath + mainName + String(".txt")).getString(), std::ios_base::app);
-#endif
 	txt << String("\n词频统计:") + String("\n");
 	// output words
 	for (int i = 0; i < len; i++)
 	{
 		if (result.getValue(i) < 2)
 			break;
-#ifdef NOT_USE_STREAM
 		txt << result[i] << String("\t\t") + String(result.getValue(i)) + String("\n");
-#else
-		txt << result[i] << String("\t\t") << result.getValue(i);
-#endif
+
 	}
-#ifdef NOT_USE_STREAM
 	fclose(txt);
-#else
-	txt.close();
-	txt.clear();
-#endif
 }
 
 void Extractor::output()

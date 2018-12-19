@@ -1,13 +1,10 @@
 #pragma once
 #include <iostream>
 #include <cassert>
+
 #define ERROR_INDEX -1
-#define NOT_USE_STREAM
-#ifdef NOT_USE_STREAM
+
 #pragma warning (disable:4996)
-//#else
-#include <fstream>
-#endif
 class String;
 String concat(const String & a, const String & b);
 
@@ -137,15 +134,8 @@ public:
 	// also, we can stream in, but it maybe not so safe
 	friend std::istream & operator >> (std::istream &, String &);
 
-	// and file operation is also important
-	//friend std::ifstream & operator >> (std::ifstream &, String &);
-
-	// however, overload ofstream << is not easy, and istream << is already enough
-	// friend std::ofstream & operator << (std::ofstream &, const String &);
-#ifdef NOT_USE_STREAM
 	//friend FILE * operator<<(FILE * fp, String & s);
 	friend FILE * operator>>(FILE *fp, String & s);
-#endif
 };
 
 class String;
@@ -164,11 +154,7 @@ inline std::ostream & operator << (std::ostream & stream, const  String & s)
 	for (i = 0; i < s.size; i++)
 		if (s[i] != '\n')
 			break;
-#ifdef NOT_USE_STREAM
 	stream << s.str + i;
-#else
-	stream << s.str + i << '\n';
-#endif
 	s[s.size] = c;
 	return stream;
 }
@@ -189,26 +175,6 @@ inline std::istream & operator >> (std::istream & stream, String & s)
 	}
 	return stream;
 }
-
-/*
-// overload ifstream >> string to read data from file until EOF
-inline std::ifstream & operator >> (std::ifstream & stream, String & s)
-{
-	char c;
-	while (c = stream.peek())
-	{
-		if (c == EOF)
-			break;
-		// important, stream will ignore some char, which we need for html tag
-		else if (c == ' ' || c == '\n')
-			s.add(c);
-		stream >> c;
-		s.add(c);
-	}
-	return stream;
-}*/
-
-#ifdef NOT_USE_STREAM
 // given that stream input/output is too slow, i decide to use some basic api
 inline FILE * operator<<(FILE * fp,const String & s)
 {
@@ -230,8 +196,6 @@ inline FILE * operator>>(FILE *fp, String & s)
 	s.size = length;
 	return fp;
 }
-
-#endif
 
 
 // concat two string to get a new string
