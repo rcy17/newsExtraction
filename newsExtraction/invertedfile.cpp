@@ -14,14 +14,15 @@
 #define RESULT_INDEX(result) result
 #endif
 
-InvertedFile::InvertedFile()
+InvertedFile::InvertedFile() :recommendMax(5), recommendIndex(nullptr)
 {
 
 }
 
 InvertedFile::~InvertedFile()
 {
-
+	if (recommendIndex)
+		delete recommendIndex;
 }
 
 // initialize some data, mainly load files
@@ -44,7 +45,7 @@ void InvertedFile::loadDict()
 	{
 		if (s[pos] == '\n')
 		{
-			
+
 			dict.insert(DICT_PAIR(s.substring(posSave, pos - posSave), wordCount++));
 			posSave = pos + 1;
 		}
@@ -58,7 +59,7 @@ void InvertedFile::loadDict()
 // load segmentation result
 void InvertedFile::loadSegmentation()
 {
-	for (int index = 0; index < FILEAMOUNT; index++)
+	for (int index = 0; index < FILE_AMOUNT; index++)
 	{
 		allNews[index].index = index;
 		loadInfo(index);
@@ -77,6 +78,11 @@ void InvertedFile::initFile()
 	fclose(fp);
 }
 
+inline void tailCheck(String & s)
+{
+	if (s[s.length() - 1] == '\r')
+		s.remove(s.length() - 1);
+}
 
 // load segmentation result
 void InvertedFile::loadInfo(int index)
@@ -90,13 +96,15 @@ void InvertedFile::loadInfo(int index)
 
 	int pos = 0, posSave = 0;
 	while (info[++pos] != '\n');
-	allNews[index].tittle = info.substring(posSave, pos - posSave);
+	tailCheck(allNews[index].tittle = info.substring(posSave, pos - posSave));
 	posSave = pos + 1;
+
 	while (info[++pos] != '\n');
-	allNews[index].source = info.substring(posSave, pos - posSave);
+	tailCheck(allNews[index].source = info.substring(posSave, pos - posSave));
 	posSave = pos + 1;
+
 	while (info[++pos] != '\n');
-	allNews[index].time = info.substring(posSave, pos - posSave);
+	tailCheck(allNews[index].time = info.substring(posSave, pos - posSave));
 	posSave = pos + 1;
 	allNews[index].content = info.substring(posSave);
 }
@@ -149,12 +157,19 @@ void InvertedFile::loadTxt(int index)
 	}
 }
 
+// set recommended upper
+void InvertedFile::setUpper(int k)
+{
+	if (recommendIndex)
+		delete recommendIndex;
+	recommendIndex = new int[recommendMax = k];
+}
 
 // add word and times in doclist
 void InvertedFile::addWord(String & word, String & number, int index)
 {
 	int times = 0;
-	for (int i = 0; i <number.length(); i++)
+	for (int i = 0; i < number.length(); i++)
 	{
 		times *= 10;
 		times += number[i] - '0';
@@ -292,10 +307,10 @@ void mergesort(int * allValue, int * allIndex, int lo, int hi)
 // sort for the occur times
 int InvertedFile::sortRecorder()
 {
-	for (int i = 0; i < FILEAMOUNT; i++)
+	for (int i = 0; i < FILE_AMOUNT; i++)
 		queryIndex[i] = i;
 
-	mergesort(occurTimes, queryIndex, 0, FILEAMOUNT);
+	mergesort(occurTimes, queryIndex, 0, FILE_AMOUNT);
 	int cnt = -1;
 	while (occurTimes[++cnt]);
 
@@ -320,8 +335,8 @@ void InvertedFile::queryNews(const String & sentence)
 			keyTry = sentence.substring(pos, length);
 			if ((index = dict.getValue(keyTry)) != DICTIONARY_WRONG_RETURN)
 			{
-				//debug
-				fp << keyTry + String("\n");
+				// debug code
+				//fp << keyTry + String("\n");
 				auto p = docList[index].first();
 				while (p)
 				{
@@ -346,12 +361,13 @@ void InvertedFile::queryNews(const String & sentence)
 				String(occurTimes[i]) + String(')');
 		}
 	else
-		fp << String("数据库中未找到合适新闻，请重新输入或去掉不必要的空格");
+		fp << String("数据库中未找到合适新闻，请去掉不必要的空格并避免使用停用词");
 	fp << String('\n');
 	fclose(fp);
 	memset(queryIndex, 0, sizeof(queryIndex));
 	memset(occurTimes, 0, sizeof(occurTimes));
 }
+
 
 
 // finish news recommend by tittle
@@ -361,19 +377,111 @@ void InvertedFile::recommend(const String & tittle)
 		return;
 	FILE *fp(fopen("result2.txt", "ab"));
 	bool founded = false;
+	String pureTittle = tittle.removeSpace();
 	for (auto & news : allNews)
 	{
-		if (tittle.tittleMatch(news.tittle))
+		if (pureTittle.tittleMatch(news.tittle))
 		{
-			//debug
-			fp << String("查找成功！编号") + String(news.index) + String("\n");
+			// debug code
+			fp << String("查找成功!") + String(news.index) + String(':') + news.tittle + String("\n");
+			recommendNews(news.index);
+			if (recommendIndex[0] == -1)
+				fp << String("未找到合适的推荐新闻，试试换个标题");
+			else
+				for (int i = 0; i < recommendMax; i++)
+				{
+					if (recommendIndex[i] == -1)
+						break;
+					if (i)
+						fp << String(',');
+					fp << String('(') + String(allNews[recommendIndex[i]].index) + String(',') + allNews[recommendIndex[i]].tittle + String(')');
+				}
 			founded = true;
 			break;
 		}
 	}
 	if (!founded)
-		fp << String("该新闻不在数据库中，无法推荐\n");
+		fp << String("该新闻不在数据库中，无法推荐");
+	fp << String('\n');
 	fclose(fp);
 
 }
 
+
+
+// recommend news from index
+void InvertedFile::recommendNews(int index)
+{
+	assert(index >= 0 && index < FILE_AMOUNT);
+	memset(recommendIndex, -1, sizeof(recommendIndex));
+
+	FILE * txt(fopen((String("./output/") + String(index) + String(".txt")).getString(), "rb"));
+	String data;
+	txt >> data;
+	fclose(txt);
+
+	int pos = data.indexOf("词频统计:");
+	while (data[++pos] != '\n');
+	int posSave = ++pos;
+	int length = data.length();
+	// count how many recommendations we got
+	int successCount = 0;
+
+	// save the max frequency of words in given news
+	int maxFre = 0;
+
+	while (pos < length)
+	{
+		// get word
+		while (data[++pos] != '\t');
+		auto result = dict.getValue(data.substring(posSave, pos - posSave));
+
+		// get frequency
+		pos+=2;
+		int t = 0;
+		while (data[pos] >= '0' && data[pos] <= '9')
+		{
+			t *= 10;
+			t += data[pos++] - '0';
+		}
+		if (data[pos] == '\r')
+			pos++;
+		posSave = ++pos;
+
+		// update save
+		if (!maxFre)
+			maxFre = t;
+		if (successCount && ((t < maxFre / 5 && t == 2)))
+			break;
+
+		auto pnode = docList[RESULT_INDEX(result)].first();
+		assert(pnode);
+		while (pnode->next)
+		{
+			// if this node is the "biggest", then the second "biggest" is what we need
+			if (pnode->next->data.index == index && !pnode->next->next)
+				break;
+			// else, find the "biggest" node
+			pnode = pnode->next;
+		}
+		if (pnode->data.index != index && (!pnode->next || (pnode->data.times>2 || pnode->next->data.times<6)))
+		{
+			bool founded = false;
+			for (int i = 0; i < successCount; i++)
+				if (recommendIndex[i] == pnode->data.index)
+				{
+					founded = true;
+					break;
+				}
+			// if this news has been recommended, ignore it
+			if (!founded)
+			{
+				recommendIndex[successCount++] = pnode->data.index;
+				// if we already got enough recommendations, end the find
+				if (successCount == recommendMax)
+					break;
+			}
+		}
+	}
+
+}

@@ -110,6 +110,14 @@ public:
 		return head->next;
 	}
 
+	// get the last node in list
+	DocNode * last() const
+	{
+		if (tail == head)
+			return nullptr;
+		return tail;
+	}
+
 	// update order in the list
 	void update(DocNode * p)
 	{

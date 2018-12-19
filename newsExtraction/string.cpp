@@ -305,7 +305,22 @@ bool String::match(const String & s, int start, int over)
 // match for news tittle, has fault-tolerance
 bool String::tittleMatch(const String & s) const
 {
-	return removeSpace() == s.removeSpace();
+	if (size > s.size)
+		return false;
+	for (int i = 0, j = 0; i < size && j<s.size;)
+	{
+		if (s[j] == '\r' || s[j] == '\n' || s[j] == ' ')
+		{
+			j++;
+		}
+		else
+		{
+			if (str[i] != s[j])
+				return false;
+			i++, j++;
+		}
+	}
+	return true;
 }
 
 int * String::buildNext(const String & s)

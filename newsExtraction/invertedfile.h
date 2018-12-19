@@ -4,28 +4,33 @@
 #include "dictionary.h"
 
 // use avl tree or use hash, 1->avl tree / 0->hash
-#define TREE_VS_HASH 1
+#define TREE_VS_HASH 0
 
 class InvertedFile
 {
 private:
 	// amount of htmls
-	static const int FILEAMOUNT = 781;
+	static const int FILE_AMOUNT = 781;
+	// aount of 
+	int recommendMax;
 
 #if TREE_VS_HASH
 	AVLTree dict;
 #else
 	Dictionary dict;
 #endif
+	// save recommended files' index
+	int *recommendIndex;
+
 	// doclists for all words in dict(including avltree or hash)
 	DocList docList[Dictionary::mod];
-	News allNews[FILEAMOUNT];
+	News allNews[FILE_AMOUNT];
 
 	// save the index for occur times after sort
-	int queryIndex[FILEAMOUNT];
+	int queryIndex[FILE_AMOUNT];
 
 	// count for occur times
-	int occurTimes[FILEAMOUNT];
+	int occurTimes[FILE_AMOUNT];
 
 	// initialize the dict
 	void loadDict();
@@ -55,6 +60,8 @@ public:
 	// initialize some data, mainly load files
 	void initialize();
 
+	// set recommended upper
+	void setUpper(int k);
 
 	// do all query operation
 	void query();
@@ -64,4 +71,7 @@ public:
 
 	// finish news recommend by tittle
 	void recommend(const String & tittle);
+
+	// recommend news from index
+	void recommendNews(int index);
 };
