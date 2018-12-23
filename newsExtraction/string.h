@@ -80,6 +80,9 @@ public:
 
 	String operator + (const String & s);
 
+	// transform this string to a int
+	int toInt() const;
+
 	// append a char to tail
 	void add(char c);
 

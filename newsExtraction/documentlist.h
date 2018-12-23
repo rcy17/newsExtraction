@@ -15,8 +15,10 @@ public:
 	String time;
 	String content;
 
-	// news total words
+	// news total words' square
 	int words;
+	// square root of words
+	double sqrt_words;
 };
 
 class Document
@@ -46,7 +48,7 @@ public:
 
 	}
 };
-// exchange two node, essentially speaking, exchange node's data
+// exchange two node by exchanging their data
 #define swap(p,q) {Document t = p->data;p->data=q->data;q->data=t;}
 
 // document list class, save document in order of occurring times
@@ -59,6 +61,7 @@ public:
 	// constructor, new a hear node
 	DocList()
 	{
+		// use head sentinel
 		head = new DocNode;
 		tail = head;
 		head->next = nullptr;
@@ -104,6 +107,7 @@ public:
 		}
 	}
 
+	// judge if this list has been empty
 	bool empty() const
 	{
 		return head == tail;
@@ -126,8 +130,10 @@ public:
 	// update order in the list
 	void update(DocNode * p)
 	{
+		// if get to tail, stop
 		while (p != tail)
 		{
+			// sort file nodes by occur times
 			if (p->data.times < p->next->data.times)
 			{
 				swap(p, p->next);
@@ -141,36 +147,41 @@ public:
 	// add a new file(index) in list
 	void add(int index, int times)
 	{
+		// save first node
 		DocNode * p = head->next;
-
+		// put new node as first node, then adjust
 		head->next = new DocNode(index, times);
 		head->next->next = p;
+		// in case add a node to empty list
 		if (tail == head)
 			tail = head->next;
 		size++;
+		// update the order
 		update(head->next);
 	}
 
 	// search a file's information by index
-	Document search(int index)
+	DocNode * search(int index)
 	{
+		// for list, we have no method but traversal
 		DocNode *p = head;
 		p = head->next;
 		while (p)
 		{
 			if (p->data.index == index)
-				return p->data;
+				return p;
 			p = p->next;
 		}
-		return Document();
+		return nullptr;
 	}
 
-	// edit a file's tiems
+	// edit a file's times by index
 	bool edit(int index, int times)
 	{
 		DocNode * p = head, *q;
 		while (p->next)
 		{
+			// first we find the node
 			if (p->next->data.index == index)
 			{
 				if (times <= p->data.times)
@@ -192,7 +203,17 @@ public:
 			}
 			p = p->next;
 		}
+		// if this node isn't in list, return false
 		return false;
+	}
+
+	// edit a file's times by point to node, use it after search
+	bool edit(DocNode * pnode, int times)
+	{
+		if (!pnode)
+			return false;
+		pnode->data = times;
+		return true;
 	}
 
 	// remove a file from the list
@@ -201,6 +222,7 @@ public:
 		DocNode * p = head, *q;
 		while (p->next)
 		{
+			// find the file and delete related data
 			if (p->next->data.index == index)
 			{
 				q = p->next->next;
@@ -211,6 +233,7 @@ public:
 			}
 			p = p->next;
 		}
+		// if havn't find the file, return false
 		return false;
 	}
 }

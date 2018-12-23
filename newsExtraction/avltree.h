@@ -24,10 +24,10 @@ public:
 	// clear all sub childs for this subtree
 	void clear();
 
-	// judge if this subtree is balanced
+	// judge if this subtree is balenced in avl sense
 	bool isBalenced();
 
-	// update this node's height
+	// update this node's height, assuming its two childs' height have updated
 	void update();
 };
 
@@ -47,11 +47,14 @@ public:
 	// clear the whole tree
 	void clearTree();
 
-	// get the size of tree
+	// get the number of nodes in this tree
 	int getSize() const;
 
 	// insert a new node in the tree
 	AVLNode * insert(const AVLNode & node);
+
+	// insert a new node by key and data
+	AVLNode * insert(const String & key, AVLData data);
 
 	// find a node by data
 	AVLNode * search(const String & key);

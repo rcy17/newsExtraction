@@ -4,7 +4,7 @@
 #include "dictionary.h"
 
 // use avl tree or use hash, 1->avl tree / 0->hash
-#define TREE_VS_HASH 0
+#define TREE_VS_HASH 1
 
 class InvertedFile
 {
@@ -41,6 +41,9 @@ private:
 	// count for occur times
 	int occurTimes[FILE_AMOUNT];
 
+	// count how many diffent words occur
+	int diffentWords[FILE_AMOUNT];
+
 	// initialize the dict
 	void loadDict();
 
@@ -57,7 +60,7 @@ private:
 	void loadTxt(int index);
 
 	// add word and times in doclist
-	void addWord(String & word, String & number, int index);
+	void addWord(String & word, int number, int index);
 	
 	// sort for the occur times and return amount of nonzero number
 	int sortRecorder();

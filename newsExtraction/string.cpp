@@ -358,6 +358,19 @@ int String::indexOf(const String & s, int position)
 	return i - j == n ? ERROR_INDEX : i - j;
 }
 
+
+// transform this string to a int
+int String::toInt() const
+{
+	int d = 0;
+	for (int i = 0; i < size; i++)
+	{
+		d *= 10;
+		d += str[i] - '0';
+	}
+	return d;
+}
+
 // try to use its char array directly
 const char * String::getString() const
 {

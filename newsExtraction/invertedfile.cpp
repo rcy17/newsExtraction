@@ -1,7 +1,8 @@
 #include "invertedfile.h"
 #include <memory>
+#include <cmath>
 
-#define RECOMMEND_LOWEST_WEIGHT (2.e-3)
+#define RECOMMEND_LOWEST_WEIGHT (1e-3)
 
 /************************* methods for InvertedFile class *********************/
 
@@ -16,10 +17,10 @@
 #define RESULT_INDEX(result) result
 #endif
 
-InvertedFile::InvertedFile() :recommendMax(5), 
-recommendIndex(nullptr),recommendWeight(nullptr)
+InvertedFile::InvertedFile() :recommendMax(5),
+recommendIndex(nullptr), recommendWeight(nullptr)
 {
-	
+
 }
 
 InvertedFile::~InvertedFile()
@@ -131,7 +132,8 @@ void InvertedFile::loadTxt(int index)
 	allNews[index].words = 0;
 
 	// start to read words and times
-	String word, number;
+	String word;
+	int number;
 	for (pos++; pos < txt.length(); pos++)
 	{
 		switch (txt[pos])
@@ -145,24 +147,25 @@ void InvertedFile::loadTxt(int index)
 			break;
 		case '\n':
 			// get number (in linux)
-			number = txt.substring(posSave, pos - posSave);
+			number = txt.substring(posSave, pos - posSave).toInt();
 			posSave = pos + 1;
 			addWord(word, number, index);
-			allNews[index].words += number;
+			allNews[index].words += number * number;
 			break;
 		case '\r':
 			// get number (in windows)
-			number = txt.substring(posSave, pos - posSave);
+			number = txt.substring(posSave, pos - posSave).toInt();
 			// skip '\n'
 			pos++;
 			posSave = pos + 1;
 			addWord(word, number, index);
-			allNews[index].words += number;
+			allNews[index].words += number * number;
 			break;
 		default:
 			break;
 		}
 	}
+	allNews[index].sqrt_words = sqrt(double(allNews[index].words));
 }
 
 // set recommended upper
@@ -179,14 +182,9 @@ void InvertedFile::setUpper(int k)
 }
 
 // add word and times in doclist
-void InvertedFile::addWord(String & word, String & number, int index)
+void InvertedFile::addWord(String & word, int number, int index)
 {
-	int times = 0;
-	for (int i = 0; i < number.length(); i++)
-	{
-		times *= 10;
-		times += number[i] - '0';
-	}
+	int times = number;
 
 	auto result = dict.search(word);
 	if (RESULT_ERROR(result))
@@ -263,66 +261,77 @@ void InvertedFile::query()
 }
 
 // swap two index-value pairs for sort
-void swap(int * allValue, int * allIndex, int rankA, int rankB)
+void swap(int * allValue, int * allIndex, int * refer, int rankA, int rankB)
 {
 	int s = allIndex[rankA];
-	int i = allValue[rankA];
-
 	allIndex[rankA] = allIndex[rankB];
-	allValue[rankA] = allValue[rankB];
-
 	allIndex[rankB] = s;
-	allValue[rankB] = i;
+
+
+	s = allValue[rankA];
+	allValue[rankA] = allValue[rankB];
+	allValue[rankB] = s;
+
+	s = refer[rankA];
+	refer[rankA] = refer[rankB];
+	refer[rankB] = s;
 }
 
 // the child function for merge sort to merge two branches
-void merge(int * allValue, int * allIndex, int lo, int mid, int hi)
+void merge(int * allValue, int * allIndex, int * refer, int lo, int mid, int hi)
 {
 	int *A = allValue + lo;
+	int *Ar = refer + lo;
 	int *As = allIndex + lo;
 	int lb = mid - lo;
 	int *B = new int[lb];
+	int *Br = new int[lb];
 	int *Bs = new int[lb];
 	for (int i = 0; i < lb; i++)
 	{
 		B[i] = A[i];
+		Br[i] = Ar[i];
 		Bs[i] = As[i];
 	}
 	int lc = hi - mid;
 	int *C = allValue + mid;
+	int *Cr = refer + mid;
 	int *Cs = allIndex + mid;
 	for (int i = 0, j = 0, k = 0; j < lb;)
 	{
-		if (k < lc&&C[k] > B[j])
+		if (k < lc && (C[k] > B[j] || (C[k] == B[j] && Cr[k] > Br[j])))
 		{
 			A[i] = C[k];
+			Ar[i] = Cr[k];
 			As[i++] = Cs[k++];
 		}
-		if (lc <= k || (B[j] >= C[k]))
+		if (lc <= k || B[j] > C[k] || (B[j] == C[k] && Br[j] >= Cr[k]))
 		{
 			As[i] = Bs[j];
+			Ar[i] = Br[j];
 			A[i++] = B[j++];
 		}
 	}
 	delete[] B;
 	delete[] Bs;
+	delete[] Br;
 }
 
 // use merge sort to sort it
-void mergesort(int * allValue, int * allIndex, int lo, int hi)
+void mergesort(int * allValue, int * allIndex, int * refer, int lo, int hi)
 {
 	if (hi - lo == 2)
 	{
 		if (allValue[lo] < allValue[lo + 1])
-			swap(allValue, allIndex, lo, lo + 1);
+			swap(allValue, allIndex, refer, lo, lo + 1);
 		return;
 	}
 	if (hi - lo < 2)
 		return;
 	int mid = (lo + hi) >> 1;
-	mergesort(allValue, allIndex, lo, mid);
-	mergesort(allValue, allIndex, mid, hi);
-	merge(allValue, allIndex, lo, mid, hi);
+	mergesort(allValue, allIndex, refer, lo, mid);
+	mergesort(allValue, allIndex, refer, mid, hi);
+	merge(allValue, allIndex, refer, lo, mid, hi);
 }
 
 // sort for the occur times
@@ -331,7 +340,7 @@ int InvertedFile::sortRecorder()
 	for (int i = 0; i < FILE_AMOUNT; i++)
 		queryIndex[i] = i;
 
-	mergesort(occurTimes, queryIndex, 0, FILE_AMOUNT);
+	mergesort(occurTimes, queryIndex, diffentWords, 0, FILE_AMOUNT);
 	int cnt = -1;
 	while (occurTimes[++cnt]);
 
@@ -341,12 +350,17 @@ int InvertedFile::sortRecorder()
 // finish news query by key word
 void InvertedFile::queryNews(const String & sentence)
 {
+	if (!sentence.length())
+		return;
 	// first segmentation
 	int sentenceLength = sentence.length();
 	String keyTry;
 	int index;
 	FILE *fp(fopen("result1.txt", "ab"));
 
+	memset(queryIndex, 0, sizeof(queryIndex));
+	memset(occurTimes, 0, sizeof(occurTimes));
+	memset(diffentWords, 0, sizeof(diffentWords));
 	// as the shortesti word has 4 byte
 	for (int pos = 0; pos < sentenceLength - 3; pos++)
 	{
@@ -361,13 +375,14 @@ void InvertedFile::queryNews(const String & sentence)
 				{
 					// count occur times
 					occurTimes[p->data.index] += p->data.times;
+					diffentWords[p->data.index]++;
 					p = p->next;
 				}
 				// with a successful try, skip these bytes
 				pos += length - 1;
 				break;
 			}
-			
+
 		}
 	}
 
@@ -384,8 +399,6 @@ void InvertedFile::queryNews(const String & sentence)
 		fp << String("数据库中未找到合适新闻，请去掉不必要的空格并避免使用停用词");
 	fp << String('\n');
 	fclose(fp);
-	memset(queryIndex, 0, sizeof(queryIndex));
-	memset(occurTimes, 0, sizeof(occurTimes));
 }
 
 // finish news recommend by tittle
@@ -412,6 +425,8 @@ void InvertedFile::recommend(const String & tittle)
 					if (i)
 						fp << String(',');
 					fp << String('(') + String(allNews[recommendIndex[i]].index) + String(',') + allNews[recommendIndex[i]].tittle + String(')');
+					// debug
+					printf("%d %f\n", recommendIndex[i], recommendWeight[i]);
 				}
 			founded = true;
 			break;
@@ -516,7 +531,7 @@ void InvertedFile::recommendNews(int index)
 		}
 		// use influency calculate the importancy of this word in two news
 		// then multiple them to get a weight for recommend
-		double factor = double(itself->data.times) / allNews[index].words;
+		double factor = itself->data.times / allNews[index].sqrt_words;
 		double factor2, weight;
 
 		while (pnode)
@@ -524,7 +539,7 @@ void InvertedFile::recommendNews(int index)
 			// we should ignore itself while scanning
 			if (pnode != itself)
 			{
-				factor2 = double(pnode->data.times) / allNews[pnode->data.index].words;
+				factor2 = pnode->data.times / allNews[pnode->data.index].sqrt_words;
 				// important: use factor's product to present weight
 				weight = factor * factor2;
 				insertRecommand(pnode->data.index, weight);

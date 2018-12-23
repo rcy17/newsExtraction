@@ -137,7 +137,8 @@ void Configuration::process()
 {
 	if (segmentWord)
 		segment();
-
+	if (segmentWord && countTime)
+		printf("segment use time:%d ms", clock() - start);
 	query();
 
 	if (countTime)
