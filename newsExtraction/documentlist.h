@@ -7,11 +7,16 @@
 class News
 {
 public:
+	// index for html
 	int index;
+	
 	String tittle;
 	String source;
 	String time;
 	String content;
+
+	// news total words
+	int words;
 };
 
 class Document
@@ -41,10 +46,10 @@ public:
 
 	}
 };
-
+// exchange two node, essentially speaking, exchange node's data
 #define swap(p,q) {Document t = p->data;p->data=q->data;q->data=t;}
 
-// document list class
+// document list class, save document in order of occurring times
 class DocList
 {
 private:
@@ -91,12 +96,12 @@ public:
 	~DocList()
 	{
 		DocNode * p = head, *q;
-		do
+		while(p)
 		{
 			q = p->next;
 			delete p;
 			p = q;
-		} while (p);
+		}
 	}
 
 	bool empty() const
@@ -123,7 +128,7 @@ public:
 	{
 		while (p != tail)
 		{
-			if (p->data.times > p->next->data.times)
+			if (p->data.times < p->next->data.times)
 			{
 				swap(p, p->next);
 				p = p->next;
@@ -168,7 +173,7 @@ public:
 		{
 			if (p->next->data.index == index)
 			{
-				if (times >= p->data.times)
+				if (times <= p->data.times)
 				{
 					// if the order before is right, just update
 					p->next->data.times = times;

@@ -4,15 +4,19 @@
 #include "dictionary.h"
 
 // use avl tree or use hash, 1->avl tree / 0->hash
-#define TREE_VS_HASH 0
+#define TREE_VS_HASH 1
 
 class InvertedFile
 {
 private:
 	// amount of htmls
 	static const int FILE_AMOUNT = 781;
-	// aount of 
+
+	// aount of max recommend news
 	int recommendMax;
+
+	// max list length(technologically), with increase of it, slower but exacter
+	const int listMax = 100;
 
 #if TREE_VS_HASH
 	AVLTree dict;
@@ -22,8 +26,13 @@ private:
 	// save recommended files' index
 	int *recommendIndex;
 
+	// save recommended files' influence weight
+	double *recommendWeight;
+
 	// doclists for all words in dict(including avltree or hash)
 	DocList docList[Dictionary::mod];
+
+	// save all news information
 	News allNews[FILE_AMOUNT];
 
 	// save the index for occur times after sort
@@ -52,6 +61,9 @@ private:
 	
 	// sort for the occur times and return amount of nonzero number
 	int sortRecorder();
+
+	// try to insert a recommendation by index and weight
+	void insertRecommand(int index, double weight);
 public:
 	InvertedFile();
 

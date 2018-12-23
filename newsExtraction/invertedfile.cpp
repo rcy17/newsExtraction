@@ -1,6 +1,8 @@
 #include "invertedfile.h"
 #include <memory>
 
+#define RECOMMEND_LOWEST_WEIGHT (2.e-3)
+
 /************************* methods for InvertedFile class *********************/
 
 // use some macros to simplify transformation from AVL tree to hash
@@ -14,15 +16,18 @@
 #define RESULT_INDEX(result) result
 #endif
 
-InvertedFile::InvertedFile() :recommendMax(5), recommendIndex(nullptr)
+InvertedFile::InvertedFile() :recommendMax(5), 
+recommendIndex(nullptr),recommendWeight(nullptr)
 {
-
+	
 }
 
 InvertedFile::~InvertedFile()
 {
 	if (recommendIndex)
 		delete recommendIndex;
+	if (recommendWeight)
+		delete recommendWeight;
 }
 
 // initialize some data, mainly load files
@@ -123,6 +128,7 @@ void InvertedFile::loadTxt(int index)
 	int posSave = pos;
 	while (txt[++pos] != '\n');
 	posSave = pos + 1;
+	allNews[index].words = 0;
 
 	// start to read words and times
 	String word, number;
@@ -142,6 +148,7 @@ void InvertedFile::loadTxt(int index)
 			number = txt.substring(posSave, pos - posSave);
 			posSave = pos + 1;
 			addWord(word, number, index);
+			allNews[index].words += number;
 			break;
 		case '\r':
 			// get number (in windows)
@@ -150,6 +157,7 @@ void InvertedFile::loadTxt(int index)
 			pos++;
 			posSave = pos + 1;
 			addWord(word, number, index);
+			allNews[index].words += number;
 			break;
 		default:
 			break;
@@ -160,9 +168,14 @@ void InvertedFile::loadTxt(int index)
 // set recommended upper
 void InvertedFile::setUpper(int k)
 {
+	assert(k > 0);
 	if (recommendIndex)
 		delete recommendIndex;
-	recommendIndex = new int[recommendMax = k];
+	if (recommendWeight)
+		delete recommendWeight;
+	recommendMax = k;
+	recommendIndex = new int[listMax];
+	recommendWeight = new double[listMax];
 }
 
 // add word and times in doclist
@@ -187,55 +200,65 @@ void InvertedFile::addWord(String & word, String & number, int index)
 // do all query operation
 void InvertedFile::query()
 {
-	FILE * fp(fopen("query1.txt", "rb"));
 	String data;
 	String sentence;
-	fseek(fp, 0, SEEK_END);
-	int length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	data.resize(length + 5);
-	fp >> data;
-	fclose(fp);
-	memset(queryIndex, 0, sizeof(queryIndex));
-	memset(occurTimes, 0, sizeof(occurTimes));
+	int length;
 	int pos = 0, posSave = 0;
-
-	while (pos < length)
+	FILE * fp(fopen("query1.txt", "rb"));
+	if (!fp)
+		printf("open query1.txt failed!\n");
+	else
 	{
-		while (data[++pos] != '\n');
-		// segmentation and query
-		queryNews(data.substring(posSave, pos - posSave));
-		posSave = pos + 1;
-		pos++;
-	}
-	if (pos != posSave)
-	{
-		// in case of lack of line feed in the end
-		queryNews(data.substring(posSave, pos - posSave));
-	}
+		fseek(fp, 0, SEEK_END);
+		length = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		data.resize(length + 5);
+		fp >> data;
+		fclose(fp);
+		memset(queryIndex, 0, sizeof(queryIndex));
+		memset(occurTimes, 0, sizeof(occurTimes));
+		pos = posSave = 0;
 
+		while (pos < length)
+		{
+			while (data[++pos] != '\n');
+			// segmentation and query
+			queryNews(data.substring(posSave, pos - posSave));
+			posSave = pos + 1;
+			pos++;
+		}
+		if (pos != posSave)
+		{
+			// in case of lack of line feed in the end
+			queryNews(data.substring(posSave, pos - posSave));
+		}
+	}
 
 	fp = fopen("query2.txt", "rb");
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	data.resize(length + 5);
-	fp >> data;
-	fclose(fp);
+	if (!fp)
+		printf("open query2.txt failed!");
+	{
+		fseek(fp, 0, SEEK_END);
+		length = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		data.resize(length + 5);
+		fp >> data;
+		fclose(fp);
 
-	pos = posSave = 0;
-	while (pos < length)
-	{
-		while (data[++pos] != '\n');
-		// recommend
-		recommend(data.substring(posSave, pos - posSave));
-		posSave = pos + 1;
-		pos++;
-	}
-	if (pos != posSave)
-	{
-		// in case of lack of line feed in the end
-		recommend(data.substring(posSave, pos - posSave));
+		pos = posSave = 0;
+		while (pos < length)
+		{
+			while (data[++pos] != '\n');
+			// recommend
+			recommend(data.substring(posSave, pos - posSave));
+			posSave = pos + 1;
+			pos++;
+		}
+		if (pos != posSave)
+		{
+			// in case of lack of line feed in the end
+			recommend(data.substring(posSave, pos - posSave));
+		}
 	}
 }
 
@@ -243,7 +266,7 @@ void InvertedFile::query()
 void swap(int * allValue, int * allIndex, int rankA, int rankB)
 {
 	int s = allIndex[rankA];
-	int i = allValue[rankB];
+	int i = allValue[rankA];
 
 	allIndex[rankA] = allIndex[rankB];
 	allValue[rankA] = allValue[rankB];
@@ -302,8 +325,6 @@ void mergesort(int * allValue, int * allIndex, int lo, int hi)
 	merge(allValue, allIndex, lo, mid, hi);
 }
 
-
-
 // sort for the occur times
 int InvertedFile::sortRecorder()
 {
@@ -327,7 +348,7 @@ void InvertedFile::queryNews(const String & sentence)
 	FILE *fp(fopen("result1.txt", "ab"));
 
 	// as the shortesti word has 4 byte
-	for (int pos = 0; pos < sentenceLength - 4; pos++)
+	for (int pos = 0; pos < sentenceLength - 3; pos++)
 	{
 		// try to scan 8 character, but if not enough, try as long as possible
 		for (int length = sentenceLength - pos > 15 ? 16 : (sentenceLength - pos); length >= 2; length--)
@@ -368,8 +389,6 @@ void InvertedFile::queryNews(const String & sentence)
 	memset(occurTimes, 0, sizeof(occurTimes));
 }
 
-
-
 // finish news recommend by tittle
 void InvertedFile::recommend(const String & tittle)
 {
@@ -384,13 +403,18 @@ void InvertedFile::recommend(const String & tittle)
 		{
 			// debug code
 			fp << String("查找成功!") + String(news.index) + String(':') + news.tittle + String("\n");
+			if (news.index == 13)
+			{
+				int a = 1;
+			}
 			recommendNews(news.index);
-			if (recommendIndex[0] == -1)
+			if (recommendIndex[0] == -1 || recommendWeight[0] < RECOMMEND_LOWEST_WEIGHT)
 				fp << String("未找到合适的推荐新闻，试试换个标题");
 			else
 				for (int i = 0; i < recommendMax; i++)
 				{
-					if (recommendIndex[i] == -1)
+					// if not get enough recommendation or weight is too light, ig
+					if (recommendIndex[i] == -1 || recommendWeight[i] < RECOMMEND_LOWEST_WEIGHT)
 						break;
 					if (i)
 						fp << String(',');
@@ -407,19 +431,60 @@ void InvertedFile::recommend(const String & tittle)
 
 }
 
+// it's not worthy to write a new function, use a temporary macro is comvenient
+#define swap(i,j) \
+{\
+	int t = recommendIndex[i];\
+	double f = recommendWeight[i];\
+	recommendIndex[i] = recommendIndex[j];recommendIndex[j] = t;\
+	recommendWeight[i] = recommendWeight[j];recommendWeight[j] = f;\
+}
 
+// try to insert a recommendation by index and weight
+void InvertedFile::insertRecommand(int index, double weight)
+{
+	for (int i = 0; i < listMax; i++)
+		// if this news has already been recommended, just merge its weight
+		if (recommendIndex[i] == index)
+		{
+			recommendWeight[i] += weight;
+			// update order
+			for (int j = i; i > 0; i--)
+			{
+				if (recommendWeight[i - 1] < recommendWeight[i])
+					swap(i - 1, i);
+			}
+			return;
+		}
+	// if its weight is not enough, ignore it
+	if (weight < recommendWeight[listMax - 1])
+		return;
+	// else we should add it into the recommendation
+	recommendWeight[listMax - 1] = weight;
+	recommendIndex[listMax - 1] = index;
+	// this is a kind of insertion sort, because it's useful and listMax should be in 10
+	for (int i = listMax - 1; i > 0; i--)
+	{
+		if (recommendWeight[i - 1] < recommendWeight[i])
+			swap(i - 1, i);
+	}
+}
+
+#undef swap
 
 // recommend news from index
 void InvertedFile::recommendNews(int index)
 {
 	assert(index >= 0 && index < FILE_AMOUNT);
-	memset(recommendIndex, -1, sizeof(recommendIndex));
+	memset(recommendIndex, -1, sizeof(recommendIndex[0]) * listMax);
+	memset(recommendWeight, 0, sizeof(recommendWeight[0]) * listMax);
 
 	FILE * txt(fopen((String("./output/") + String(index) + String(".txt")).getString(), "rb"));
 	String data;
 	txt >> data;
 	fclose(txt);
 
+	// we use this news' word frequency to recommend
 	int pos = data.indexOf("词频统计:");
 	while (data[++pos] != '\n');
 	int posSave = ++pos;
@@ -437,7 +502,7 @@ void InvertedFile::recommendNews(int index)
 		auto result = dict.getValue(data.substring(posSave, pos - posSave));
 
 		// get frequency
-		pos+=2;
+		pos += 2;
 		int t = 0;
 		while (data[pos] >= '0' && data[pos] <= '9')
 		{
@@ -448,39 +513,35 @@ void InvertedFile::recommendNews(int index)
 			pos++;
 		posSave = ++pos;
 
-		// update save
-		if (!maxFre)
-			maxFre = t;
-		if (successCount && ((t < maxFre / 5 && t == 2)))
-			break;
-
-		auto pnode = docList[RESULT_INDEX(result)].first();
+		auto pnode = docList[result].first();
+		auto itself = pnode;
 		assert(pnode);
-		while (pnode->next)
+		// first we find this news this word's frequency to calculate factor
+		while (itself->data.index != index)
 		{
-			// if this node is the "biggest", then the second "biggest" is what we need
-			if (pnode->next->data.index == index && !pnode->next->next)
-				break;
-			// else, find the "biggest" node
-			pnode = pnode->next;
+			itself = itself->next;
 		}
-		if (pnode->data.index != index && (!pnode->next || (pnode->data.times>2 || pnode->next->data.times<6)))
+		// use influency calculate the importancy of this word in two news
+		// then multiple them to get a weight for recommend
+		double factor = double(itself->data.times) / allNews[index].words;
+		double factor2, weight;
+
+		while (pnode)
 		{
-			bool founded = false;
-			for (int i = 0; i < successCount; i++)
-				if (recommendIndex[i] == pnode->data.index)
-				{
-					founded = true;
-					break;
-				}
-			// if this news has been recommended, ignore it
-			if (!founded)
+			// we should ignore itself while scanning
+			if (pnode != itself)
 			{
-				recommendIndex[successCount++] = pnode->data.index;
-				// if we already got enough recommendations, end the find
-				if (successCount == recommendMax)
-					break;
+				factor2 = double(pnode->data.times) / allNews[pnode->data.index].words;
+				// important: use factor's product to present weight
+				weight = factor * factor2;
+				if (pnode->data.index == 704)
+				{
+					// debug code
+					int b = 1;
+				}
+				insertRecommand(pnode->data.index, weight);
 			}
+			pnode = pnode->next;
 		}
 	}
 

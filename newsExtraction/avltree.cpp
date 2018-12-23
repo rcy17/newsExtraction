@@ -19,7 +19,7 @@ AVLNode::AVLNode(String key, const AVLData data):key(key),data(data),
 
 // copy constructor
 AVLNode::AVLNode(const AVLNode & node) : key(node.key), data(node.data),
-height(0), lchild(nullptr), rchild(nullptr)
+height(0), lchild(nullptr), rchild(nullptr),parent(nullptr)
 {
 
 }

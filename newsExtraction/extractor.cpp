@@ -4,7 +4,7 @@
 using std::cout;
 
 #define STOP_WORD_FLAG -1
-#define SCAN_ENGLISH_WORD 1
+#define SCAN_ENGLISH_WORD 0
 
 /************************* methods for Extractor class *********************/
 
@@ -622,10 +622,14 @@ void Extractor::divideWords()
 
 	txt << String("·Ö´Ê½á¹û:") + String("\n");
 	// as the shortesti word has 4 byte
-	for (int pos = 0; pos < contentLength - 4; pos++)
+	for (int pos = 0; pos < contentLength - 3; pos++)
 	{
 		// try to scan 8 character, but if not enough, try as long as possible
+#if SCAN_ENGLISH_WORD
 		for (int length = contentLength - pos > 15 ? 16 : (contentLength - pos); length >= 2; length--)
+#else
+		for (int length = contentLength - pos > 15 ? 16 : (contentLength - pos); length >= 4; length-=2)
+#endif
 		{
 			keyTry = content.substring(pos, length);
 			if (dict.inDict(keyTry))
@@ -667,8 +671,8 @@ void Extractor::outputTxt()
 	// output words
 	for (int i = 0; i < len; i++)
 	{
-		if (result.getValue(i) < 2)
-			break;
+		/*if (result.getValue(i) < 2)
+			break;*/
 		txt << result[i] << String("\t\t") + String(result.getValue(i)) + String("\n");
 
 	}
