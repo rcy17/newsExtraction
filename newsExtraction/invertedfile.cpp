@@ -356,8 +356,6 @@ void InvertedFile::queryNews(const String & sentence)
 			keyTry = sentence.substring(pos, length);
 			if ((index = dict.getValue(keyTry)) != DICTIONARY_WRONG_RETURN)
 			{
-				// debug code
-				//fp << keyTry + String("\n");
 				auto p = docList[index].first();
 				while (p)
 				{
@@ -369,6 +367,7 @@ void InvertedFile::queryNews(const String & sentence)
 				pos += length - 1;
 				break;
 			}
+			
 		}
 	}
 
@@ -401,12 +400,6 @@ void InvertedFile::recommend(const String & tittle)
 	{
 		if (pureTittle.tittleMatch(news.tittle))
 		{
-			// debug code
-			fp << String("查找成功!") + String(news.index) + String(':') + news.tittle + String("\n");
-			if (news.index == 13)
-			{
-				int a = 1;
-			}
 			recommendNews(news.index);
 			if (recommendIndex[0] == -1 || recommendWeight[0] < RECOMMEND_LOWEST_WEIGHT)
 				fp << String("未找到合适的推荐新闻，试试换个标题");
@@ -534,11 +527,6 @@ void InvertedFile::recommendNews(int index)
 				factor2 = double(pnode->data.times) / allNews[pnode->data.index].words;
 				// important: use factor's product to present weight
 				weight = factor * factor2;
-				if (pnode->data.index == 704)
-				{
-					// debug code
-					int b = 1;
-				}
 				insertRecommand(pnode->data.index, weight);
 			}
 			pnode = pnode->next;

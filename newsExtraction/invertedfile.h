@@ -4,7 +4,7 @@
 #include "dictionary.h"
 
 // use avl tree or use hash, 1->avl tree / 0->hash
-#define TREE_VS_HASH 1
+#define TREE_VS_HASH 0
 
 class InvertedFile
 {
